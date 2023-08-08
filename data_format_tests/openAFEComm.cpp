@@ -1,5 +1,7 @@
 #include "openAFEComm.h"
 
+#include <stdio.h>
+
 #define COMM_BUFFER_SIZE 64 // The size of the communication buffer, for commands and messages.
 
 /**
@@ -46,7 +48,6 @@ uint8_t _calculateCRCForMessage(String pMessage)
 
 	for (uint8_t i = 0; i < tMessageLength; i++)
 	{
-		// printf("%c", (char)tMessageArray[i]);
 		calculatedChecksum ^= (char)(tMessageArray[i]);
 	}
 
@@ -84,11 +85,119 @@ bool _isCommandCRCValid(String pCommand)
 	return isCommandValid;
 }
 
+/**
+ * @brief Sends the given message to the App, adding the suffix and CRC.
+ * 
+ * @note Note that the message shall not include the suffix ($) nor 
+ * asterix (*), e.g.: "MSG,RDY".
+ * 
+ * @param pMessage IN -- Raw message to be sent, e.g.: "MSG,RDY".
+ */
+void _sendMessage(String pMessage)
+{
+	if(!Serial) return;
+
+	char tChecksumArr[3];
+
+	sprintf(tChecksumArr, "%02x", _calculateCRCForMessage(pMessage));
+
+	String tChecksumString = String(tChecksumArr);
+	tChecksumString.toUpperCase();
+
+	String tMessageToSend = '$' + pMessage + '*' + tChecksumString;
+
+	Serial.println(tMessageToSend);
+
+	return;
+}
+
+// *** NORMAL MESSAGES
+/**
+ * @brief Send message to the App that the device is ready.
+ * 
+ */
+void _MSG_ready(void)
+{
+	_sendMessage("MSG,RDY");
+	return;
+}
+
+/**
+ * @brief Send message to the App that the wave generation is starting.
+ * 
+ */
+void _MSG_startingVoltammetry(void)
+{
+	_sendMessage("MSG,STR");
+	return;
+}
+
+/**
+ * @brief Send message to the App that the wave generation is finished.
+ *
+ */
+void _MSG_endOfVoltammetry(void)
+{
+	_sendMessage("MSG,END");
+	return;
+}
+
+// *** ERROR MESSAGES
+/**
+ * @brief Send GENERAL ERROR to the App.
+ * 
+ */
+void _ERR_GENERAL(void)
+{
+	_sendMessage("ERR,GND");
+	return;
+}
+
+/**
+ * @brief Send INVALID ERROR to the App.
+ * 
+ */
+void _ERR_INVALID_CHECKSUM(void)
+{
+	_sendMessage("ERR,INV");
+	return;
+}
+
+/**
+ * @brief Send PARAMETER ERROR to the App.
+ * 
+ */
+void _ERR_PARAMETER_OUT_OF_BOUNDS(void)
+{
+	_sendMessage("ERR,PAR");
+	return;
+}
+
+/**
+ * @brief Send WAVE ERROR to the App.
+ * 
+ */
+void _ERR_WAVE_GENERATION(void)
+{
+	_sendMessage("ERR,WAV");
+	return;
+}
+
+/**
+ * @brief Send AFE ERROR to the App.
+ * 
+ */
+void _ERR_AFE_NOT_WORKING(void)
+{
+	_sendMessage("ERR,AFE");
+	return;
+}
+
 void openAFEComm_waitForCommands(void)
 {
-	// message send, ready
-	Serial.print("$MSG,RDY*");
-	Serial.println((int)_calculateCRCForMessage("MSG,RDY"), HEX);
+	if(!Serial) return;
+
+	_MSG_ready();
 
 	while (1)
 	{
@@ -113,7 +222,7 @@ void openAFEComm_waitForCommands(void)
 		}
 		else
 		{
-			Serial.println("Error: Invalid command received. Please enter a valid command!");
+			_ERR_INVALID_CHECKSUM();
 		}
 	}
 }
