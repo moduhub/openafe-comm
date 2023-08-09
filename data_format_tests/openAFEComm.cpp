@@ -118,6 +118,16 @@ void _sendMessage(String pMessage)
 
 // *** NORMAL MESSAGES
 /**
+ * @brief Send a message to the App aknowledging that the command was received.
+ * 
+ */
+void _MSG_received(void)
+{
+	_sendMessage("MSG,RCD");
+	return;
+}
+
+/**
  * @brief Send message to the App that the device is ready.
  * 
  */
@@ -229,6 +239,8 @@ void openAFEComm_waitForCommands(void)
 
 			if(openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams) < 0)
 				_ERR_GENERAL();
+
+			_MSG_received();
 
 			int tExeResult = openAFEExecutioner_executeCommand(&commandParams);
 
