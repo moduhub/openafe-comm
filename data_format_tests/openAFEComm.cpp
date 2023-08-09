@@ -1,5 +1,10 @@
 #include "openAFEComm.h"
 
+#include "openAFE_Shared.h"
+#include "openAFE_Error_Codes.h"
+#include "openAFE_Interpreter.h"
+#include "openAFE_Executioner.h"
+
 #include <stdio.h>
 
 #define COMM_BUFFER_SIZE 64 // The size of the communication buffer, for commands and messages.
@@ -149,7 +154,7 @@ void _MSG_endOfVoltammetry(void)
  */
 void _ERR_GENERAL(void)
 {
-	_sendMessage("ERR,GND");
+	_sendMessage("ERR,GEN");
 	return;
 }
 
@@ -193,6 +198,8 @@ void _ERR_AFE_NOT_WORKING(void)
 	return;
 }
 
+static command_t commandParams;
+
 void openAFEComm_waitForCommands(void)
 {
 	if(!Serial) return;
@@ -218,7 +225,15 @@ void openAFEComm_waitForCommands(void)
 		// Check if input value is within range
 		if (_isCommandCRCValid(tCommandReceived))
 		{
-			Serial.println("Command is valid!");
+			// Serial.println("Command is valid!");
+
+			if(openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams) < 0)
+				_ERR_GENERAL();
+
+			int tExeResult = openAFEExecutioner_executeCommand(&commandParams);
+
+			if (tExeResult < 0) 
+				_ERR_GENERAL(); 
 		}
 		else
 		{
