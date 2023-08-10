@@ -157,56 +157,12 @@ void _MSG_endOfVoltammetry(void)
 	return;
 }
 
-// *** ERROR MESSAGES
 /**
- * @brief Send GENERAL ERROR to the App.
- * 
+ * @brief Sends the proper error message accorrding to the error code passed. 
+ *
+ * @param pErrorCode IN -- Code of the error ocurred, e.g.: -1 (ERROR_INVALID_COMMAND).
  */
-void _ERR_GENERAL(void)
-{
-	_sendMessage("ERR,GEN");
-	return;
-}
-
-/**
- * @brief Send INVALID ERROR to the App.
- * 
- */
-void _ERR_INVALID_CHECKSUM(void)
-{
-	_sendMessage("ERR,INV");
-	return;
-}
-
-/**
- * @brief Send PARAMETER ERROR to the App.
- * 
- */
-void _ERR_PARAMETER_OUT_OF_BOUNDS(void)
-{
-	_sendMessage("ERR,PAR");
-	return;
-}
-
-/**
- * @brief Send WAVE ERROR to the App.
- * 
- */
-void _ERR_WAVE_GENERATION(void)
-{
-	_sendMessage("ERR,WAV");
-	return;
-}
-
-/**
- * @brief Send AFE ERROR to the App.
- * 
- */
-void _ERR_AFE_NOT_WORKING(void)
-{
-	_sendMessage("ERR,AFE");
-	return;
-}
+void _ERR_HANDLER(int pErrorCode);
 
 static command_t commandParams;
 
@@ -237,19 +193,51 @@ void openAFEComm_waitForCommands(void)
 		{
 			// Serial.println("Command is valid!");
 
-			if(openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams) < 0)
-				_ERR_GENERAL();
+			int tInterpreterResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams);
 
-			_MSG_received();
+			if(tInterpreterResult < 0) {
+				_ERR_HANDLER(tInterpreterResult);
+			} else {
+				_MSG_received();
+			}
 
 			int tExeResult = openAFEExecutioner_executeCommand(&commandParams);
 
-			if (tExeResult < 0) 
-				_ERR_GENERAL(); 
+			if (tExeResult < 0) {
+				_ERR_HANDLER(tExeResult);
+			} else {
+				_MSG_endOfVoltammetry();
+			}
 		}
 		else
 		{
-			_ERR_INVALID_CHECKSUM();
+			_ERR_HANDLER(ERROR_INVALID_COMMAND);
 		}
+	}
+}
+
+void _ERR_HANDLER(int pErrorCode)
+{
+	switch (pErrorCode)
+	{
+	case ERROR_INVALID_COMMAND:
+		_sendMessage("ERR,INV");
+		break;
+	case ERROR_PARAM_OUT_BOUNDS:
+		_sendMessage("ERR,PAR");
+		break;
+	case ERROR_PARAM_MISSING:
+		_sendMessage("ERR,PAR");
+		break;
+	case ERROR_GENERAL:
+		_sendMessage("ERR,GEN");
+		break;
+	case ERROR_AFE_NOT_WORKING:
+		_sendMessage("ERR,AFE");
+		break;
+	case ERROR_WAVE_GEN:
+		_sendMessage("ERR,WAV");
+	default:
+		break;
 	}
 }
