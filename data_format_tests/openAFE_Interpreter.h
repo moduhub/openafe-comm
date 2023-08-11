@@ -9,7 +9,7 @@
 /**
  * @brief
  *
- * @param pCommandString IN -- Command string to be interpreted, e.g.: "$CV,500,-500,250,10,2*10"
+ * @param pCommandString IN -- Command string to be interpreted, e.g.: "$CVW,500,-500,250,10,2*47"
  * @param pCommandParams OUT -- Command parameters gotten from the command string.
  * @return >0 if successful, <0 on error (with error code).
  */

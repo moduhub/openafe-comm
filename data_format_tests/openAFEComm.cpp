@@ -158,6 +158,18 @@ void _MSG_endOfVoltammetry(void)
 }
 
 /**
+ * @brief Send a single point result (SGL) to the App, with the given parameters. 
+ * 
+ * @param pVoltage_mV IN -- Voltage level in mV.
+ * @param pCurrent_uA In -- Current in uA.
+ */
+void _sendSinglePointResult(float pVoltage_mV, float pCurrent_uA)
+{
+	String tSinglePointResult = "SGL," + String(pVoltage_mV) + "," + String(pCurrent_uA); 
+	_sendMessage(tSinglePointResult);
+}
+
+/**
  * @brief Sends the proper error message accorrding to the error code passed. 
  *
  * @param pErrorCode IN -- Code of the error ocurred, e.g.: -1 (ERROR_INVALID_COMMAND).
@@ -166,7 +178,7 @@ void _ERR_HANDLER(int pErrorCode);
 
 static command_t commandParams;
 
-void openAFEComm_waitForCommands(void)
+void openAFEComm_waitForCommands(AFE *pOpenafeInstance)
 {
 	if(!Serial) return;
 
@@ -191,7 +203,7 @@ void openAFEComm_waitForCommands(void)
 		// Check if input value is within range
 		if (_isCommandCRCValid(tCommandReceived))
 		{
-			// Serial.println("Command is valid!");
+			openAFEExecutioner_setPointResultMessageCallback(_sendSinglePointResult);
 
 			int tInterpreterResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams);
 
@@ -201,7 +213,7 @@ void openAFEComm_waitForCommands(void)
 				_MSG_received();
 			}
 
-			int tExeResult = openAFEExecutioner_executeCommand(&commandParams);
+			int tExeResult = openAFEExecutioner_executeCommand(pOpenafeInstance, &commandParams);
 
 			if (tExeResult < 0) {
 				_ERR_HANDLER(tExeResult);
