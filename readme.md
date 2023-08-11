@@ -70,6 +70,8 @@ This is a header file that contains the definition of multiple errors, and is us
 ## Standard Messages
 > Standard messages have a MSG preceding the message code, for example: `$MSG,RDY*3A`.
 - RDY - Device is ready to receive commands from the App.
+- RCD - Message received.
+- STR - The voltammetry is starting.
 ## Error Messages
 > Error messages have a ERR preceding the error message, for example: `$ERR,INV*38`. 
 - GEN - General error, may include an error message.
@@ -77,6 +79,32 @@ This is a header file that contains the definition of multiple errors, and is us
 - PAR - Parameter error, one of the parameters passed is out of bounds.
 - WAV - Wave error, an error has ocurred during the voltammetry process.
 - AFE - AFE error, for any reason the AFE IC does not respond properly, e.g. does not pass the health check.
+
+# Implementation Progress
+## Command Implementation
+Command | Implemented? 
+--------|--------------
+CVW		| [ ]
+DPV		| [ ]
+SWV		| [ ]
+CHK		| [x]
+RUN 	| [ ]
+DIE		| [ ]
+TIA		| [ ]
+
+## Message Implementation
+Message | Implemented? 
+--------|--------------
+SGL		| [ ]
+MLT		| [ ]
+RDY		| [x]
+RCD		| [ ]
+STR		| [ ]
+GEN		| [ ]
+INV		| [x]
+PAR		| [x]
+WAV		| [ ]
+AFE		| [x]  
 
 # FAQ
 
