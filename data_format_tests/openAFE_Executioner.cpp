@@ -75,11 +75,6 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 
 int _checkAFEHealth(AFE *pOpenafeInstance)
 {
-	if(Serial)
-	{
-		Serial.println("Ran AFE check!");
-	}
-
 	if(pOpenafeInstance)
 	{
 		if (pOpenafeInstance->isAFEResponding()) {
@@ -88,10 +83,8 @@ int _checkAFEHealth(AFE *pOpenafeInstance)
 			return ERROR_AFE_NOT_WORKING;
 		}
 	} else {
-		Serial.println("Could not find the openAFE instance");
 		return ERROR_AFE_NOT_WORKING;
 	}
-	// call the openAFE AFE check
 	return ERROR_AFE_NOT_WORKING;
 }
 
