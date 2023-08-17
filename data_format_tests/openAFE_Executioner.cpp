@@ -18,6 +18,14 @@ void (*gPointResultMessageCallback)(float, float);
 int _checkAFEHealth(AFE *pOpenafeInstance);
 
 /**
+ * @brief Stop the currently undergoing voltammetry.
+ * 
+ * @param pOpenafeInstance IN -- OpenAFE class instance.
+ * @return 
+ */
+int _stopVoltammetry(AFE *pOpenafeInstance);
+
+/**
  * @brief Handle the received point result from voltammetry proccess.
  * 
  * @param pVoltage_mV IN -- Voltage level in millivolts.
@@ -51,6 +59,10 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 		return _checkAFEHealth(pOpenafeInstance);
 		break;
 	
+	case CMDID_DIE:
+		return _stopVoltammetry(pOpenafeInstance);
+		break;
+
 	case CMDID_CVW:
 		return _executeCyclicVoltammetry(pOpenafeInstance, pCommandParams);
 		break;
@@ -81,6 +93,15 @@ int _checkAFEHealth(AFE *pOpenafeInstance)
 	}
 	// call the openAFE AFE check
 	return ERROR_AFE_NOT_WORKING;
+}
+
+int _stopVoltammetry(AFE *pOpenafeInstance)
+{
+	if (pOpenafeInstance)
+	{
+		pOpenafeInstance->killVoltammetry();
+	}
+	return 1;
 }
 
 void _handlePointResult(float pVoltage_mV, float pCurrent_uA)

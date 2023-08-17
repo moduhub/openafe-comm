@@ -72,6 +72,10 @@ int _populateCommandParameters(uint8_t pCommandId, command_t *pCommandParams, St
 		pCommandParams->id = CMDID_CHK;
 		break;
 
+	case CMDID_DIE:
+		pCommandParams->id = CMDID_DIE;
+		break;
+
 	case CMDID_CVW:
 		_parseCVParams(pCommandParams, pCommandString);
 		break;

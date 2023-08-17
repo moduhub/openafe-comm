@@ -9,6 +9,10 @@
 
 #define COMM_BUFFER_SIZE 64 // The size of the communication buffer, for commands and messages.
 
+static command_t commandParams;
+
+AFE gOpenafeInstance;
+
 /**
  * @brief Get the interger checksum from a string/message.
  *
@@ -158,30 +162,57 @@ void _MSG_endOfVoltammetry(void)
 }
 
 /**
- * @brief Send a single point result (SGL) to the App, with the given parameters. 
+ * @brief Sends the proper error message accorrding to the error code passed.
+ *
+ * @param pErrorCode IN -- Code of the error ocurred, e.g.: -1 (ERROR_INVALID_COMMAND).
+ */
+void _ERR_HANDLER(int pErrorCode);
+
+/**
+ * @brief Send a single point result (SGL) to the App, with the given parameters 
+ * and also check for incoming messages from the App, and send command to executioner,
+ * if valid.
  * 
  * @param pVoltage_mV IN -- Voltage level in mV.
  * @param pCurrent_uA In -- Current in uA.
  */
 void _sendSinglePointResult(float pVoltage_mV, float pCurrent_uA)
 {
+	if (Serial.available() > 0)
+	{
+		// Read user input string
+		String tCommandReceived = Serial.readStringUntil('\n');
+		// Remove trailing newline character
+		tCommandReceived.trim();
+
+		if(_isCommandCRCValid(tCommandReceived))
+		{
+			int tInterpretResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams);
+
+			if (tInterpretResult < 0) 
+			{
+				_ERR_HANDLER(tInterpretResult);
+			} 
+			else 
+			{
+				int tExecutionResult = openAFEExecutioner_executeCommand(&gOpenafeInstance, &commandParams);
+
+				if (tExecutionResult < 0) _ERR_HANDLER(tExecutionResult);
+			}
+		}
+	}
+
 	String tSinglePointResult = "SGL," + String(pVoltage_mV) + "," + String(pCurrent_uA); 
 	_sendMessage(tSinglePointResult);
 }
 
-/**
- * @brief Sends the proper error message accorrding to the error code passed. 
- *
- * @param pErrorCode IN -- Code of the error ocurred, e.g.: -1 (ERROR_INVALID_COMMAND).
- */
-void _ERR_HANDLER(int pErrorCode);
-
-static command_t commandParams;
 
 void openAFEComm_waitForCommands(AFE *pOpenafeInstance)
 {
 	if(!Serial) return;
 
+	gOpenafeInstance = *pOpenafeInstance;
+	
 	_MSG_ready();
 
 	while (1)
@@ -213,7 +244,7 @@ void openAFEComm_waitForCommands(AFE *pOpenafeInstance)
 				_MSG_received();
 			}
 
-			int tExeResult = openAFEExecutioner_executeCommand(pOpenafeInstance, &commandParams);
+			int tExeResult = openAFEExecutioner_executeCommand(&gOpenafeInstance, &commandParams);
 
 			if (tExeResult < 0) {
 				_ERR_HANDLER(tExeResult);
