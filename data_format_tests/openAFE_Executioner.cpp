@@ -37,6 +37,7 @@ void _handlePointResult(float pVoltage_mV, float pCurrent_uA);
  * @brief Executes the Cyclic Voltammetry with the received parameters.
  * The function will return error code in case of any error. 
  * 
+ * @param pOpenafeInstance IN -- OpenAFE device instance.
  * @param pCommandParams IN -- Command parameters struct.
  * @return >0 if successful, error code on error.
  */
