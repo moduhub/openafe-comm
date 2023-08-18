@@ -42,6 +42,16 @@ void _handlePointResult(float pVoltage_mV, float pCurrent_uA);
  */
 int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams);
 
+/**
+ * @brief Set the TIA Gain Resistor.
+ * 
+ * @param pOpenafeInstance IN -- OpenAFE device instance.
+ * @param pCommandParams IN -- Command parameters struct.
+ * @return >0 if successful, error code on error.
+ */
+int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams);
+
+
 void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(float, float))
 {
 	gPointResultMessageCallback = pPointResultMessageCallback;
@@ -61,6 +71,10 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 	
 	case CMDID_DIE:
 		return _stopVoltammetry(pOpenafeInstance);
+		break;
+
+	case CMDID_TIA:
+		return _setTIAGainResistor(pOpenafeInstance, pCommandParams);
 		break;
 
 	case CMDID_CVW:
@@ -144,4 +158,15 @@ int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
 	}
 
 	return ERROR_GENERAL; // JUST FOR TESTING
+}
+
+int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams)
+{
+	if (pOpenafeInstance)
+	{
+		pOpenafeInstance->setTIAGain(pCommandParams->gainTIA);
+		return 1;
+	} else {
+		return ERROR_GENERAL;
+	}
 }

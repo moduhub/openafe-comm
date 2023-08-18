@@ -90,7 +90,7 @@ SWV		| [ ]
 CHK		| [x]
 RUN 	| [ ]
 DIE		| [ ]
-TIA		| [ ]
+TIA		| [x]
 
 ## Message Implementation
 Message | Implemented? 

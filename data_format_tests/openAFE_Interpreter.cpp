@@ -44,6 +44,14 @@ void _separateCommandParameters(String pParamArray[], String pCommandString, cha
  */
 void _parseCVParams(command_t *pCommandParams, String pCommandString);
 
+/**
+ * @brief Parse TIA Gain command parameters.
+ * 
+ * @param pCommandParams OUT -- Command parameters struct.
+ * @param pCommandString IN -- Command message string.
+ */
+void _parseTIAParams(command_t *pCommandParams, String pCommandString);
+
 int openAFEInterpreter_getParametersFromCommand(String pCommandString, command_t *pCommandParams)
 {
 	int interpreterResult = 0;
@@ -76,6 +84,11 @@ int _populateCommandParameters(uint8_t pCommandId, command_t *pCommandParams, St
 		pCommandParams->id = CMDID_DIE;
 		break;
 
+	case CMDID_TIA:
+		pCommandParams->id = CMDID_TIA;
+		_parseTIAParams(pCommandParams, pCommandString);
+		break;
+
 	case CMDID_CVW:
 		_parseCVParams(pCommandParams, pCommandString);
 		break;
@@ -103,6 +116,19 @@ void _parseCVParams(command_t *pCommandParams, String pCommandString)
 
 	return;
 }
+
+void _parseTIAParams(command_t *pCommandParams, String pCommandString)
+{
+	String tParamsArray[1];
+	
+	_separateCommandParameters(tParamsArray, pCommandString, ',', 2);
+
+	pCommandParams->id = CMDID_TIA;
+	pCommandParams->gainTIA = tParamsArray[1].toInt();
+
+	return;
+}
+
 
 void _separateCommandParameters(String pParamArray[], String pCommandString, char pSeparator, uint8_t pNumParams)
 {
