@@ -32,6 +32,7 @@
 struct command_t
 {
 	uint8_t id;				 // Command ID.
+	uint16_t settlingTime;	 // Settling time, in milliseconds.
 	float startingPotential; // Starting potential, in mV.
 	float endingPotential;	 // Ending potential, in mV.
 	float scanRate;			 // Scan rate, in mV.

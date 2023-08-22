@@ -116,16 +116,17 @@ int _populateCommandParameters(uint8_t pCommandId, command_t *pCommandParams, St
 
 void _parseCVParams(command_t *pCommandParams, String pCommandString)
 {
-	String tParamArray[5];
+	String tParamArray[6];
 
-	_separateCommandParameters(tParamArray, pCommandString, ',', 5);
+	_separateCommandParameters(tParamArray, pCommandString, ',', 6);
 
 	pCommandParams->id = CMDID_CVW;
-	pCommandParams->endingPotential = tParamArray[0].toFloat();
+	pCommandParams->settlingTime = tParamArray[0].toInt();
 	pCommandParams->startingPotential = tParamArray[1].toFloat();
-	pCommandParams->scanRate = tParamArray[2].toFloat();
-	pCommandParams->stepSize = tParamArray[3].toFloat();
-	pCommandParams->numCycles = tParamArray[4].toInt();
+	pCommandParams->endingPotential = tParamArray[2].toFloat();
+	pCommandParams->scanRate = tParamArray[3].toFloat();
+	pCommandParams->stepSize = tParamArray[4].toFloat();
+	pCommandParams->numCycles = tParamArray[5].toInt();
 
 	return;
 }

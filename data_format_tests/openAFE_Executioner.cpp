@@ -154,12 +154,13 @@ int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
 
 	if (pOpenafeInstance)
 	{
-		uint8_t tCVResult = pOpenafeInstance->waveformCV(pCommandParams->endingPotential / 1000,
-											   pCommandParams->startingPotential / 1000,
-											   pCommandParams->scanRate,
-											   pCommandParams->stepSize,
-											   pCommandParams->numCycles);
-		
+		uint8_t tCVResult = pOpenafeInstance->waveformCV(pCommandParams->settlingTime,
+														 pCommandParams->startingPotential / 1000,
+														 pCommandParams->endingPotential / 1000,
+														 pCommandParams->scanRate,
+														 pCommandParams->stepSize,
+														 pCommandParams->numCycles);
+
 		if (!tCVResult) {
 			return ERROR_PARAM_OUT_BOUNDS;
 		} else {
