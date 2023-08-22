@@ -132,7 +132,7 @@ void _parseCVParams(command_t *pCommandParams, String pCommandString)
 
 void _parseTIAParams(command_t *pCommandParams, String pCommandString)
 {
-	String tParamsArray[1];
+	String tParamsArray[2];
 	
 	_separateCommandParameters(tParamsArray, pCommandString, ',', 2);
 
