@@ -13,6 +13,7 @@
 #define CMDID_SWV 6u	// Feed SW parameters, check possibility of the wave and start the voltammetry.
 
 #define CMDID_TIA 10u // Command to change the Transimpedance Amplifier gain resistor.
+#define CMDID_CUR 11u // Command to change the TIA gain resistor using the current as the parameter.
 
 #define CMDID_CV_PARAMS 155u  // Feed the CV params and the sequencer (for the sequencer ONLY).
 #define CMDID_DPV_PARAMS 156u // Feed the DVP params and the sequencer (for the sequencer ONLY).
@@ -35,6 +36,7 @@ struct command_t
 	uint16_t numPoints;		 // Number of points.
 	float pulseAmplitude;	 // Pulse amplitude in mV.
 	uint16_t gainTIA;		 // TIA gain.
+	uint16_t currentRange;	 // AFE current range, in uA.	
 };
 
 #endif // _OPENAFE_SHARED_

@@ -52,6 +52,15 @@ void _parseCVParams(command_t *pCommandParams, String pCommandString);
  */
 void _parseTIAParams(command_t *pCommandParams, String pCommandString);
 
+/**
+ * @brief Parse Current range command parameters.
+ * 
+ * @param pCommandParams OUT -- Command parameters struct.
+ * @param pCommandString IN -- Command message string.
+ */
+void _parseCurrentRangeParams(command_t *pCommandParams, String pCommandString);
+
+
 int openAFEInterpreter_getParametersFromCommand(String pCommandString, command_t *pCommandParams)
 {
 	int interpreterResult = 0;
@@ -87,6 +96,10 @@ int _populateCommandParameters(uint8_t pCommandId, command_t *pCommandParams, St
 	case CMDID_TIA:
 		pCommandParams->id = CMDID_TIA;
 		_parseTIAParams(pCommandParams, pCommandString);
+		break;
+
+	case CMDID_CUR:
+		_parseCurrentRangeParams(pCommandParams, pCommandString);
 		break;
 
 	case CMDID_CVW:
@@ -129,6 +142,16 @@ void _parseTIAParams(command_t *pCommandParams, String pCommandString)
 	return;
 }
 
+void _parseCurrentRangeParams(command_t *pCommandParams, String pCommandString)
+{
+	String tParamsArray[2];
+
+	_separateCommandParameters(tParamsArray, pCommandString, ',', 2);
+	pCommandParams->id = CMDID_CUR;
+	pCommandParams->currentRange = tParamsArray[1].toInt();
+
+	return;
+}
 
 void _separateCommandParameters(String pParamArray[], String pCommandString, char pSeparator, uint8_t pNumParams)
 {
@@ -198,6 +221,10 @@ uint8_t _getCommandIdFromString(String pCommandString)
 		else if (strcmp(tSecondCommandCode, "TIA") == 0)
 		{
 			return CMDID_TIA;
+		}
+		else if (strcmp(tSecondCommandCode, "CUR") == 0)
+		{
+			return CMDID_CUR;
 		}
 		else
 		{

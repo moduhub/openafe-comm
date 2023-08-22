@@ -61,6 +61,7 @@ This is a header file that contains the definition of multiple errors, and is us
 - RUN - Run (start) the voltammetry process (sequencer only).
 - CHK - Check if the AFE is responding properly, reads from the ADIID register.
 - DIE - Kills the MCU and AFE, making them 'die' (reset).
+- CUR - Set the expected current range.
 - TIA - Configures the Transimpedance Amplifier (TIA) gain resistor.
 
 # List of Messages (MCU to App)
@@ -90,6 +91,7 @@ SWV		| [ ]
 CHK		| [x]
 RUN 	| [ ]
 DIE		| [ ]
+CUR		| [ ]
 TIA		| [x]
 
 ## Message Implementation

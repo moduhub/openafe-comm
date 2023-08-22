@@ -52,6 +52,15 @@ int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams);
  */
 int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams);
 
+/**
+ * @brief Set the current range of the AFE.
+ * 
+ * @param pOpenafeInstance IN -- OpenAFE device instance.
+ * @param pCommandParams IN -- Command parameters struct.
+ * @return >0 if successful, error code on error.
+ */
+int _setCurrentRange(AFE *pOpenafeInstance, command_t *pCommandParams);
+
 
 void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(float, float))
 {
@@ -80,6 +89,10 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 
 	case CMDID_CVW:
 		return _executeCyclicVoltammetry(pOpenafeInstance, pCommandParams);
+		break;
+
+	case CMDID_CUR:
+		return _setCurrentRange(pOpenafeInstance, pCommandParams);
 		break;
 
 	default:
@@ -166,6 +179,17 @@ int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams)
 	if (pOpenafeInstance)
 	{
 		pOpenafeInstance->setTIAGain(pCommandParams->gainTIA);
+		return 1;
+	} else {
+		return ERROR_GENERAL;
+	}
+}
+
+int _setCurrentRange(AFE *pOpenafeInstance, command_t *pCommandParams)
+{
+	if (pOpenafeInstance)
+	{
+		pOpenafeInstance->setCurrentRange(pCommandParams->currentRange);
 		return 1;
 	} else {
 		return ERROR_GENERAL;
