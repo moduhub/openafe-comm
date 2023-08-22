@@ -248,7 +248,7 @@ void openAFEComm_waitForCommands(AFE *pOpenafeInstance)
 
 			if (tExeResult < 0) {
 				_ERR_HANDLER(tExeResult);
-			} else {
+			} else if (tExeResult == EXE_CVW_DONE){
 				_MSG_endOfVoltammetry();
 			}
 		}

@@ -163,7 +163,7 @@ int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
 		if (!tCVResult) {
 			return ERROR_PARAM_OUT_BOUNDS;
 		} else {
-			return 1;
+			return EXE_CVW_DONE;
 		}
 	}
 	else

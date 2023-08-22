@@ -19,6 +19,10 @@
 #define CMDID_DPV_PARAMS 156u // Feed the DVP params and the sequencer (for the sequencer ONLY).
 #define CMDID_SW_PARAMS 157u  // Feed the SW params and the sequencer (for the sequencer ONLY).
 
+#define EXE_CVW_DONE 200u // Execution of Cyclic voltammetry finished.
+#define EXE_DPV_DONE 201u // Execution of Differential Pulse voltammetry finished.
+#define EXE_SWV_DONE 202u // Execution of Square wave voltammetry finished.
+
 // YOU MAY WANT TO TAKE A LOOK AT THIS:
 // https://bitbucket.org/moduhub/pstat1fw-git/src/master/src/main.c
 /**
