@@ -44,6 +44,16 @@ void _handlePointResult(float pVoltage_mV, float pCurrent_uA);
 int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams);
 
 /**
+ * @brief Executes the Differential Pulse Voltammetry with the received parameters.
+ * The function will return error code in case of any error. 
+ * 
+ * @param pOpenafeInstance IN -- OpenAFE device instance.
+ * @param pCommandParams IN -- Command parameters struct.
+ * @return >0 if successful, error code on error.
+ */
+int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams);
+
+/**
  * @brief Set the TIA Gain Resistor.
  * 
  * @param pOpenafeInstance IN -- OpenAFE device instance.
@@ -89,6 +99,10 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 
 	case CMDID_CVW:
 		return _executeCyclicVoltammetry(pOpenafeInstance, pCommandParams);
+		break;
+
+	case CMDID_DPV:
+		return _executeDifferentialPulseVoltammetry(pOpenafeInstance, pCommandParams);
 		break;
 
 	case CMDID_CUR:
@@ -173,6 +187,37 @@ int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
 	}
 
 	return ERROR_GENERAL; // JUST FOR TESTING
+}
+
+int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
+{
+	if (pOpenafeInstance)
+	{
+		pOpenafeInstance->setPointResultCallback(_handlePointResult);
+
+		uint8_t tCVResult = pOpenafeInstance->waveformDPV(pCommandParams->settlingTime,
+														  pCommandParams->startingPotential,
+														  pCommandParams->endingPotential,
+														  pCommandParams->pulseAmplitude,
+														  pCommandParams->stepSize,
+														  pCommandParams->pulseWidth,
+														  pCommandParams->baseWidth,
+														  pCommandParams->samplePeriodPulse,
+														  pCommandParams->samplePeriodBase);
+
+		if (!tCVResult)
+		{
+			return ERROR_PARAM_OUT_BOUNDS;
+		}
+		else
+		{
+			return EXE_DPV_DONE;
+		}
+	}
+	else
+	{
+		return ERROR_GENERAL;
+	}
 }
 
 int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams)

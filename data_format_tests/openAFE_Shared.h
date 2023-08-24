@@ -42,6 +42,10 @@ struct command_t
 	float pulseAmplitude;	 // Pulse amplitude in mV.
 	uint16_t gainTIA;		 // TIA gain.
 	uint16_t currentRange;	 // AFE current range, in uA.	
+	uint16_t pulseWidth; 	 // Pulse top width, in milliseconds.
+	uint16_t baseWidth;		 // Base width, in milliseconds.
+	uint16_t samplePeriodPulse; // Sample time before the pulse go down.
+	uint16_t samplePeriodBase;	// Sample time before the pulse go up.
 };
 
 #endif // _OPENAFE_SHARED_

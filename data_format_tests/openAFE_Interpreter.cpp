@@ -45,6 +45,14 @@ void _separateCommandParameters(String pParamArray[], String pCommandString, cha
 void _parseCVParams(command_t *pCommandParams, String pCommandString);
 
 /**
+ * @brief Parse Differential Pulse Voltammetry parameters.
+ * 
+ * @param pCommandParams OUT -- Command parameters struct.
+ * @param pCommandString IN -- Command message string.
+ */
+void _parseDPVParams(command_t *pCommandParams, String pCommandString);
+
+/**
  * @brief Parse TIA Gain command parameters.
  * 
  * @param pCommandParams OUT -- Command parameters struct.
@@ -106,6 +114,10 @@ int _populateCommandParameters(uint8_t pCommandId, command_t *pCommandParams, St
 		_parseCVParams(pCommandParams, pCommandString);
 		break;
 	
+	case CMDID_DPV:
+		_parseDPVParams(pCommandParams, pCommandString);
+		break;
+
 	default:
 		returnValue = ERROR_INVALID_COMMAND;
 		break;
@@ -127,6 +139,26 @@ void _parseCVParams(command_t *pCommandParams, String pCommandString)
 	pCommandParams->scanRate = tParamArray[3].toFloat();
 	pCommandParams->stepSize = tParamArray[4].toFloat();
 	pCommandParams->numCycles = tParamArray[5].toInt();
+
+	return;
+}
+
+void _parseDPVParams(command_t *pCommandParams, String pCommandString)
+{
+	String tParamArray[9];
+
+	_separateCommandParameters(tParamArray, pCommandString, ',', 9);
+
+	pCommandParams->id = CMDID_DPV;
+	pCommandParams->settlingTime = tParamArray[0].toInt();
+	pCommandParams->startingPotential = tParamArray[1].toFloat();
+	pCommandParams->endingPotential = tParamArray[2].toFloat();
+	pCommandParams->pulseAmplitude = tParamArray[3].toFloat();
+	pCommandParams->stepSize = tParamArray[4].toFloat();
+	pCommandParams->pulseWidth = tParamArray[5].toInt();
+	pCommandParams->baseWidth = tParamArray[6].toInt();
+	pCommandParams->samplePeriodPulse = tParamArray[7].toInt();
+	pCommandParams->samplePeriodBase = tParamArray[8].toInt();
 
 	return;
 }
