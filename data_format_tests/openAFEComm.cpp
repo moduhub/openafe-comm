@@ -113,9 +113,9 @@ void _sendMessage(String pMessage)
 	String tChecksumString = String(tChecksumArr);
 	tChecksumString.toUpperCase();
 
-	String tMessageToSend = '$' + pMessage + '*' + tChecksumString;
+	String tMessageToSend = '$' + pMessage + '*' + tChecksumString + '\n';
 
-	Serial.println(tMessageToSend);
+	Serial.print(tMessageToSend);
 
 	return;
 }
