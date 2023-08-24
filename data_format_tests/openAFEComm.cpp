@@ -240,16 +240,18 @@ void openAFEComm_waitForCommands(AFE *pOpenafeInstance)
 
 			if(tInterpreterResult < 0) {
 				_ERR_HANDLER(tInterpreterResult);
-			} else {
+			} 
+			if (commandParams.id == CMDID_CVW || commandParams.id == CMDID_DPV || commandParams.id == CMDID_SWV)
 				_MSG_received();
-			}
 
 			int tExeResult = openAFEExecutioner_executeCommand(&gOpenafeInstance, &commandParams);
 
 			if (tExeResult < 0) {
 				_ERR_HANDLER(tExeResult);
-			} else if (tExeResult == EXE_CVW_DONE){
+			} else if ((tExeResult == EXE_CVW_DONE) || (tExeResult == EXE_DPV_DONE) || (tExeResult == EXE_SWV_DONE)){
 				_MSG_endOfVoltammetry();
+			} else {
+				_MSG_received();
 			}
 		}
 		else
