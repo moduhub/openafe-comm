@@ -100,7 +100,7 @@ Message | Implemented?
 SGL		| [x]
 MLT		| [ ]
 RDY		| [x]
-RCD		| [ ]
+RCD		| [x]
 STR		| [ ]
 GEN		| [ ]
 INV		| [x]
