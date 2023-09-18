@@ -207,6 +207,31 @@ void _sendSinglePointResult(float pVoltage_mV, float pCurrent_uA)
 }
 
 
+int _handlePoint(AFE *pOpenafeInstance)
+{
+	do
+	{
+		if (pOpenafeInstance->dataAvailable() > 0)
+		{
+			noInterrupts(); // Disable interrupts while reading data FIFO
+
+			float voltage_mV;
+			float current_uA;
+			pOpenafeInstance->getPoint(&voltage_mV, &current_uA);
+			interrupts(); // Enable back interrupts after reading data from FIFO
+
+			_sendSinglePointResult(voltage_mV, current_uA);
+		}
+		delay(1);
+
+	} while (!pOpenafeInstance->done());
+
+	detachInterrupt(digitalPinToInterrupt(2));
+
+	return EXE_CVW_DONE;
+}
+
+
 void openAFEComm_waitForCommands(AFE *pOpenafeInstance)
 {
 	if(!Serial) return;
@@ -246,6 +271,11 @@ void openAFEComm_waitForCommands(AFE *pOpenafeInstance)
 
 			int tExeResult = openAFEExecutioner_executeCommand(&gOpenafeInstance, &commandParams);
 
+			if (tExeResult == STATUS_VOLTAMMETRY_UNDERGOING)
+			{
+				tExeResult = _handlePoint(&gOpenafeInstance);
+			} 
+			
 			if (tExeResult < 0) {
 				_ERR_HANDLER(tExeResult);
 			} else if ((tExeResult == EXE_CVW_DONE) || (tExeResult == EXE_DPV_DONE) || (tExeResult == EXE_SWV_DONE)){

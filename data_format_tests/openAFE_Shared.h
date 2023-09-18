@@ -23,6 +23,8 @@
 #define EXE_DPV_DONE 201u // Execution of Differential Pulse voltammetry finished.
 #define EXE_SWV_DONE 202u // Execution of Square wave voltammetry finished.
 
+#define STATUS_VOLTAMMETRY_UNDERGOING 210u // The Voltammetry process is currently in progress.
+
 // YOU MAY WANT TO TAKE A LOOK AT THIS:
 // https://bitbucket.org/moduhub/pstat1fw-git/src/master/src/main.c
 /**
