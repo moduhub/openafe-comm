@@ -178,6 +178,7 @@ void _ERR_HANDLER(int pErrorCode);
  */
 void _sendSinglePointResult(float pVoltage_mV, float pCurrent_uA)
 {
+	noInterrupts();
 	if (Serial.available() > 0)
 	{
 		// Read user input string
@@ -201,6 +202,7 @@ void _sendSinglePointResult(float pVoltage_mV, float pCurrent_uA)
 			}
 		}
 	}
+	interrupts();
 
 	String tSinglePointResult = "SGL," + String(pVoltage_mV) + "," + String(pCurrent_uA); 
 	_sendMessage(tSinglePointResult);
