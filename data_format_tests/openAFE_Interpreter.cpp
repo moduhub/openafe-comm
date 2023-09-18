@@ -68,6 +68,52 @@ void _parseTIAParams(command_t *pCommandParams, String pCommandString);
  */
 void _parseCurrentRangeParams(command_t *pCommandParams, String pCommandString);
 
+/**
+ * @brief Get the interger checksum from a string/message.
+ *
+ * @param pString IN -- String with the CRC-8 to be stracted, e.g.: "$CV,500,-500,250,10,2*10"
+ * @return CRC-8 integer (e.g. 16).
+ */
+uint8_t _getCRCIntegerFromString(String pString)
+{
+	uint8_t tStringLength = pString.length();
+
+	char tStringCheckSum[] = {pString[tStringLength - 2], pString[tStringLength - 1]};
+	uint8_t tIntegerChecksum;
+
+	tIntegerChecksum = tStringCheckSum[1] > 0x3a ? (uint8_t)(tStringCheckSum[1] - 0x37) : (uint8_t)(tStringCheckSum[1] - 0x30);
+	tIntegerChecksum += tStringCheckSum[0] << 4;
+
+	// Serial.print("Integer cehcksum: 0x");
+	// Serial.println(tIntegerChecksum, HEX);
+
+	return tIntegerChecksum;
+}
+
+bool openAFEInterpreter_isCommandCRCValid(String pCommand)
+{
+	uint8_t tCommandLength = pCommand.length();
+
+	char tCommandArray[tCommandLength + 1];
+
+	pCommand.toCharArray(tCommandArray, tCommandLength + 1);
+
+	uint8_t tCalculatedChecksum = 0;
+
+	// the iterator starts at 1 to eliminate the suffix, '$'
+	// the '-3' is to remove the asterix and the CRC, "*7C"
+	for (uint8_t i = 1; i < tCommandLength - 3; i++)
+	{
+		// Serial.print(tCommandArray[i]);
+		tCalculatedChecksum ^= tCommandArray[i];
+	}
+
+	uint8_t tChecksumFromCommand = _getCRCIntegerFromString(pCommand);
+
+	bool isCommandValid = (tCalculatedChecksum - tChecksumFromCommand) == 0 ? true : false;
+
+	return isCommandValid;
+}
 
 int openAFEInterpreter_getParametersFromCommand(String pCommandString, command_t *pCommandParams)
 {

@@ -115,6 +115,3 @@ AFE		| [x]
 
 ### Why some messages/commands are called special?
 - It is because they are special in one way or another, in case of special commands (CVW, DPV and SWV) they not only feed with parameters but also start the voltammetry. And in the case of special messages (SGL and MLT), they are the result of voltammetry itself, so they are special for that matter alone.
-
-### If the interpreter gets to do command message interpretation and parse, why isn't the function that check the command checksum in there, but it is instead in the openAFEComm?
-- As the name says, the interpreter does the interpretation, you may also ask: "but an interpreter can also check if a translation is possible, if the sentence is right in the first place, why can't the openAFE Interpreter do that?" then I answer, it is because ... right, I will move it to the interpreter.  
