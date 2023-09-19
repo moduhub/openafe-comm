@@ -164,8 +164,9 @@ int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
 	if (pOpenafeInstance)
 	{
 		int tCVResult = pOpenafeInstance->setCVSequence(
-			pCommandParams->endingPotential / 1000,
+			pCommandParams->settlingTime,
 			pCommandParams->startingPotential / 1000,
+			pCommandParams->endingPotential / 1000,
 			pCommandParams->scanRate,
 			pCommandParams->stepSize,
 			pCommandParams->numCycles);
