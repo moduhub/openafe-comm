@@ -194,27 +194,55 @@ int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pComm
 {
 	if (pOpenafeInstance)
 	{
-		// DPV TEMPORARILY REMOVED
-		// pOpenafeInstance->setPointResultCallback(_handlePointResult);
+		// Serial.print("Settling time: ");
+		// Serial.println(pCommandParams->settlingTime);
 
-		// uint8_t tCVResult = pOpenafeInstance->waveformDPV(pCommandParams->settlingTime,
-		// 												  pCommandParams->startingPotential,
-		// 												  pCommandParams->endingPotential,
-		// 												  pCommandParams->pulseAmplitude,
-		// 												  pCommandParams->stepSize,
-		// 												  pCommandParams->pulseWidth,
-		// 												  pCommandParams->baseWidth,
-		// 												  pCommandParams->samplePeriodPulse,
-		// 												  pCommandParams->samplePeriodBase);
-		uint8_t tCVResult = 0;
+		// Serial.print("Starting Potential: ");
+		// Serial.println(pCommandParams->startingPotential);
+		
+		// Serial.print("Ending Potential: ");
+		// Serial.println(pCommandParams->endingPotential);
 
-		if (!tCVResult)
+		// Serial.print("Pulse Potential: ");
+		// Serial.println(pCommandParams->pulseAmplitude);
+
+		// Serial.print("Step Size: ");
+		// Serial.println(pCommandParams->stepSize);
+
+		// Serial.print("Pulse width: ");
+		// Serial.println(pCommandParams->pulseWidth);
+
+		// Serial.print("Base width: ");
+		// Serial.println(pCommandParams->baseWidth);
+
+		// Serial.print("Sample period pulse: ");
+		// Serial.println(pCommandParams->samplePeriodPulse);
+
+		// Serial.print("Sample period base: ");
+		// Serial.println(pCommandParams->samplePeriodBase);
+
+		uint8_t tCVResult = pOpenafeInstance->setDPVSequence(pCommandParams->settlingTime,
+															 pCommandParams->startingPotential,
+															 pCommandParams->endingPotential,
+															 pCommandParams->pulseAmplitude,
+															 pCommandParams->stepSize,
+															 pCommandParams->pulseWidth,
+															 pCommandParams->baseWidth,
+															 pCommandParams->samplePeriodPulse,
+															 pCommandParams->samplePeriodBase);
+
+		if (tCVResult <= 0)
 		{
 			return ERROR_PARAM_OUT_BOUNDS;
 		}
 		else
 		{
-			return EXE_DPV_DONE;
+			pinMode(2, INPUT);
+			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); // Config the Arduino Interrupt
+
+			pOpenafeInstance->startVoltammetry();
+
+			return STATUS_VOLTAMMETRY_UNDERGOING;
 		}
 	}
 	else
