@@ -48,6 +48,7 @@ struct command_t
 	uint16_t baseWidth;		 // Base width, in milliseconds.
 	uint16_t samplePeriodPulse; // Sample time before the pulse go down.
 	uint16_t samplePeriodBase;	// Sample time before the pulse go up.
+	float pulseFrequency;		// Pulse frequency, in Hertz.
 };
 
 #endif // _OPENAFE_SHARED_

@@ -53,6 +53,14 @@ void _parseCVParams(command_t *pCommandParams, String pCommandString);
 void _parseDPVParams(command_t *pCommandParams, String pCommandString);
 
 /**
+ * @brief Parse Square Wave Voltammetry parameters.
+ * 
+ * @param pCommandParams OUT -- Command parameters struct.
+ * @param pCommandString IN -- Command message string.
+ */
+void _parseSWVParams(command_t *pCommandParams, String pCommandString);
+
+/**
  * @brief Parse TIA Gain command parameters.
  * 
  * @param pCommandParams OUT -- Command parameters struct.
@@ -164,6 +172,10 @@ int _populateCommandParameters(uint8_t pCommandId, command_t *pCommandParams, St
 		_parseDPVParams(pCommandParams, pCommandString);
 		break;
 
+	case CMDID_SWV:
+		_parseSWVParams(pCommandParams, pCommandString);
+		break;
+
 	default:
 		returnValue = ERROR_INVALID_COMMAND;
 		break;
@@ -205,6 +217,24 @@ void _parseDPVParams(command_t *pCommandParams, String pCommandString)
 	pCommandParams->baseWidth = tParamArray[6].toInt();
 	pCommandParams->samplePeriodPulse = tParamArray[7].toInt();
 	pCommandParams->samplePeriodBase = tParamArray[8].toInt();
+
+	return;
+}
+
+void _parseSWVParams(command_t *pCommandParams, String pCommandString)
+{
+	String tParamArray[7];
+
+	_separateCommandParameters(tParamArray, pCommandString, ',', 7);
+
+	pCommandParams->id = CMDID_SWV;
+	pCommandParams->settlingTime = tParamArray[0].toInt();
+	pCommandParams->startingPotential = tParamArray[1].toFloat();
+	pCommandParams->endingPotential = tParamArray[2].toFloat();
+	pCommandParams->scanRate = tParamArray[3].toFloat();
+	pCommandParams->pulseAmplitude = tParamArray[4].toFloat();
+	pCommandParams->pulseFrequency = tParamArray[5].toFloat();
+	pCommandParams->samplePeriodPulse = tParamArray[6].toInt();
 
 	return;
 }

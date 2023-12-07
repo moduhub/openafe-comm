@@ -54,6 +54,16 @@ int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams);
 int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams);
 
 /**
+ * @brief Executes the Square Wave Voltammetry with the received parameters.
+ * The function will return error code in case of any error. 
+ * 
+ * @param pOpenafeInstance IN -- OpenAFE device instance.
+ * @param pCommandParams IN -- Command parameters struct.
+ * @return >0 if successful, error code on error.
+ */
+int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams);
+
+/**
  * @brief Set the TIA Gain Resistor.
  * 
  * @param pOpenafeInstance IN -- OpenAFE device instance.
@@ -103,6 +113,10 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 
 	case CMDID_DPV:
 		return _executeDifferentialPulseVoltammetry(pOpenafeInstance, pCommandParams);
+		break;
+
+	case CMDID_SWV:
+		return _executeSquareWaveVoltammetry(pOpenafeInstance, pCommandParams);
 		break;
 
 	case CMDID_CUR:
@@ -230,6 +244,59 @@ int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pComm
 															 pCommandParams->baseWidth,
 															 pCommandParams->samplePeriodPulse,
 															 pCommandParams->samplePeriodBase);
+
+		if (tCVResult <= 0)
+		{
+			return ERROR_PARAM_OUT_BOUNDS;
+		}
+		else
+		{
+			pinMode(2, INPUT);
+			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); // Config the Arduino Interrupt
+
+			pOpenafeInstance->startVoltammetry();
+
+			return STATUS_VOLTAMMETRY_UNDERGOING;
+		}
+	}
+	else
+	{
+		return ERROR_GENERAL;
+	}
+}
+
+int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
+{
+	if (pOpenafeInstance)
+	{
+		// Serial.print("Settling time: ");
+		// Serial.println(pCommandParams->settlingTime);
+
+		// Serial.print("Starting Potential: ");
+		// Serial.println(pCommandParams->startingPotential);
+
+		// Serial.print("Ending Potential: ");
+		// Serial.println(pCommandParams->endingPotential);
+
+		// Serial.print("Scan Rate: ");
+		// Serial.println(pCommandParams->scanRate);
+
+		// Serial.print("Pulse Potential: ");
+		// Serial.println(pCommandParams->pulseAmplitude);
+
+		// Serial.print("Pulse frequency: ");
+		// Serial.println(pCommandParams->pulseFrequency);
+
+		// Serial.print("Sample period pulse: ");
+		// Serial.println(pCommandParams->samplePeriodPulse);
+
+		uint8_t tCVResult = pOpenafeInstance->setSWVSequence(pCommandParams->settlingTime,
+															 pCommandParams->startingPotential,
+															 pCommandParams->endingPotential,
+															 pCommandParams->scanRate,
+															 pCommandParams->pulseAmplitude,
+															 pCommandParams->pulseFrequency,
+															 pCommandParams->samplePeriodPulse);
 
 		if (tCVResult <= 0)
 		{
