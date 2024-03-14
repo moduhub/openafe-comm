@@ -7,8 +7,6 @@ void setup()
 {
 	Serial.begin(115200);
 
-	openafe.setupCV();
-
 	openAFEComm_waitForCommands(&openafe);
 }
 
