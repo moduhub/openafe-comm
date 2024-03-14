@@ -160,24 +160,9 @@ void _handlePointResult(float pVoltage_mV, float pCurrent_uA)
 
 int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
 {	
-	// Serial.print("Ending Potential: ");
-	// Serial.println(pCommandParams->endingPotential);
-
-	// Serial.print("Starting Potential: ");
-	// Serial.println(pCommandParams->startingPotential);
-
-	// Serial.print("Scan Rate: ");
-	// Serial.println(pCommandParams->scanRate);
-
-	// Serial.print("Step Size: ");
-	// Serial.println(pCommandParams->stepSize);
-
-	// Serial.print("Number of Cycles: ");
-	// Serial.println(pCommandParams->numCycles);
-
 	if (pOpenafeInstance)
 	{
-		int tCVResult = pOpenafeInstance->setCVSequence(
+		int tResult = pOpenafeInstance->setCVSequence(
 			pCommandParams->settlingTime,
 			pCommandParams->startingPotential,
 			pCommandParams->endingPotential,
@@ -185,7 +170,7 @@ int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
 			pCommandParams->stepSize,
 			pCommandParams->numCycles);
 
-		if (tCVResult <= 0) {
+		if (tResult <= 0) {
 			return ERROR_PARAM_OUT_BOUNDS;
 		} else {
 			pinMode(2, INPUT);
@@ -208,34 +193,7 @@ int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pComm
 {
 	if (pOpenafeInstance)
 	{
-		// Serial.print("Settling time: ");
-		// Serial.println(pCommandParams->settlingTime);
-
-		// Serial.print("Starting Potential: ");
-		// Serial.println(pCommandParams->startingPotential);
-		
-		// Serial.print("Ending Potential: ");
-		// Serial.println(pCommandParams->endingPotential);
-
-		// Serial.print("Pulse Potential: ");
-		// Serial.println(pCommandParams->pulseAmplitude);
-
-		// Serial.print("Step Size: ");
-		// Serial.println(pCommandParams->stepSize);
-
-		// Serial.print("Pulse width: ");
-		// Serial.println(pCommandParams->pulseWidth);
-
-		// Serial.print("Base width: ");
-		// Serial.println(pCommandParams->baseWidth);
-
-		// Serial.print("Sample period pulse: ");
-		// Serial.println(pCommandParams->samplePeriodPulse);
-
-		// Serial.print("Sample period base: ");
-		// Serial.println(pCommandParams->samplePeriodBase);
-
-		uint8_t tCVResult = pOpenafeInstance->setDPVSequence(pCommandParams->settlingTime,
+		uint8_t tResult = pOpenafeInstance->setDPVSequence(pCommandParams->settlingTime,
 															 pCommandParams->startingPotential,
 															 pCommandParams->endingPotential,
 															 pCommandParams->pulseAmplitude,
@@ -245,7 +203,7 @@ int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pComm
 															 pCommandParams->samplePeriodPulse,
 															 pCommandParams->samplePeriodBase);
 
-		if (tCVResult <= 0)
+		if (tResult <= 0)
 		{
 			return ERROR_PARAM_OUT_BOUNDS;
 		}
@@ -269,28 +227,7 @@ int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandPara
 {
 	if (pOpenafeInstance)
 	{
-		// Serial.print("Settling time: ");
-		// Serial.println(pCommandParams->settlingTime);
-
-		// Serial.print("Starting Potential: ");
-		// Serial.println(pCommandParams->startingPotential);
-
-		// Serial.print("Ending Potential: ");
-		// Serial.println(pCommandParams->endingPotential);
-
-		// Serial.print("Scan Rate: ");
-		// Serial.println(pCommandParams->scanRate);
-
-		// Serial.print("Pulse Potential: ");
-		// Serial.println(pCommandParams->pulseAmplitude);
-
-		// Serial.print("Pulse frequency: ");
-		// Serial.println(pCommandParams->pulseFrequency);
-
-		// Serial.print("Sample period pulse: ");
-		// Serial.println(pCommandParams->samplePeriodPulse);
-
-		uint8_t tCVResult = pOpenafeInstance->setSWVSequence(pCommandParams->settlingTime,
+		uint8_t tResult = pOpenafeInstance->setSWVSequence(pCommandParams->settlingTime,
 															 pCommandParams->startingPotential,
 															 pCommandParams->endingPotential,
 															 pCommandParams->scanRate,
@@ -298,7 +235,7 @@ int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandPara
 															 pCommandParams->pulseFrequency,
 															 pCommandParams->samplePeriodPulse);
 
-		if (tCVResult <= 0)
+		if (tResult <= 0)
 		{
 			return ERROR_PARAM_OUT_BOUNDS;
 		}
