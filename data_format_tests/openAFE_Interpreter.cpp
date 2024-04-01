@@ -92,9 +92,6 @@ uint8_t _getCRCIntegerFromString(String pString)
 	tIntegerChecksum = tStringCheckSum[1] > 0x3a ? (uint8_t)(tStringCheckSum[1] - 0x37) : (uint8_t)(tStringCheckSum[1] - 0x30);
 	tIntegerChecksum += tStringCheckSum[0] << 4;
 
-	// Serial.print("Integer cehcksum: 0x");
-	// Serial.println(tIntegerChecksum, HEX);
-
 	return tIntegerChecksum;
 }
 
@@ -111,10 +108,7 @@ bool openAFEInterpreter_isCommandCRCValid(String pCommand)
 	// the iterator starts at 1 to eliminate the suffix, '$'
 	// the '-3' is to remove the asterix and the CRC, "*7C"
 	for (uint8_t i = 1; i < tCommandLength - 3; i++)
-	{
-		// Serial.print(tCommandArray[i]);
 		tCalculatedChecksum ^= tCommandArray[i];
-	}
 
 	uint8_t tChecksumFromCommand = _getCRCIntegerFromString(pCommand);
 
