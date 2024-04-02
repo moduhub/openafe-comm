@@ -1,5 +1,5 @@
-#include "openAFEComm.h"
-#include "openafe.h"
+#include <openAFEComm.h>
+#include <openafe.h>
 
 AFE openafe;
 

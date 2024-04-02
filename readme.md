@@ -8,9 +8,9 @@ Firstly, it is required to install the [OpenAFE library](https://github.com/modu
 
 Finally, it is time to download the OpenAFE Comm:
 - Download the OpenAFE Comm as zip
-- Extract the "data_format_tests" folder in the folder where the Arduino code is stored by default, usually located at user/documents/Arduino
+- Do the same process to include this library, go to Sketch>Include Library>Add .ZIP Library and select the recently downloaded OpenAFE Comm library zip file
 
-Now open `data_format_tests.ino` in Arduino IDE and upload it to the Arduino board with the shield.
+Now in Arduino IDE, got to File>Examples>openafe_comm>openafe_communication to open `openafe_communication.ino` example from the openafe_comm libray, and upload it to the Arduino board with the shield.
 
 # List of Commands (App to MCU)
 ## Special Commands
