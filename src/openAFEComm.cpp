@@ -13,6 +13,9 @@ static command_t commandParams;
 
 AFE gOpenafeInstance;
 
+int SEQ1 = 0;
+int SEQ0 = 0;
+
 /**
  * @brief Calculate the checksum for a given string/message.
  * 
@@ -160,9 +163,25 @@ int _handlePoint(AFE *pOpenafeInstance)
 {
 	do
 	{
+		Serial.println(pOpenafeInstance->isAFEResponding());
 		if (pOpenafeInstance->dataAvailable() > 0)
 		{
 			noInterrupts(); // Disable interrupts while reading data FIFO
+
+			if(SEQ0 == 1 || SEQ1 == 1){
+			Serial.print("Sequenciador alterado para: ");
+			Serial.println(pOpenafeInstance->CheckFlags());
+			}
+			if(pOpenafeInstance -> CheckFlags() == 0){
+				SEQ1 = 0;
+				SEQ0++;
+				Serial.println(SEQ0);
+			} else if(pOpenafeInstance -> CheckFlags() == 1){
+				SEQ0 = 0;
+				SEQ1++;
+				Serial.println(SEQ1);
+			}
+		
 
 			float voltage_mV;
 			float current_uA;
