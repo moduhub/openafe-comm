@@ -166,8 +166,9 @@ int _handlePoint(AFE *pOpenafeInstance)
 		Serial.println(pOpenafeInstance->isAFEResponding());
 		if (pOpenafeInstance->dataAvailable() > 0)
 		{
+			Serial.println("Loop");
 			noInterrupts(); // Disable interrupts while reading data FIFO
-
+			
 			if(SEQ0 == 1 || SEQ1 == 1){
 			Serial.print("Sequenciador alterado para: ");
 			Serial.println(pOpenafeInstance->CheckFlags());
@@ -181,8 +182,6 @@ int _handlePoint(AFE *pOpenafeInstance)
 				SEQ1++;
 				Serial.println(SEQ1);
 			}
-		
-
 			float voltage_mV;
 			float current_uA;
 			pOpenafeInstance->getPoint(&voltage_mV, &current_uA);
@@ -191,7 +190,7 @@ int _handlePoint(AFE *pOpenafeInstance)
 			_sendSinglePointResult(voltage_mV, current_uA);
 		}
 		delay(1);
-
+		Serial.flush();
 	} while (!pOpenafeInstance->done());
 
 	detachInterrupt(digitalPinToInterrupt(2));
