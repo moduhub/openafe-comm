@@ -60,6 +60,15 @@ void _parseDPVParams(command_t *pCommandParams, String pCommandString);
  */
 void _parseSWVParams(command_t *pCommandParams, String pCommandString);
 
+/*================EIS======================*/
+/**
+ * @brief Parse Square Wave Voltammetry parameters.
+ * 
+ * @param pCommandParams OUT -- Command parameters struct.
+ * @param pCommandString IN -- Command message string.
+ */
+void _parseEISParams(command_t *pCommandParams, String pCommandString)
+
 /**
  * @brief Parse TIA Gain command parameters.
  * 
@@ -338,4 +347,23 @@ uint8_t _getCommandIdFromString(String pCommandString)
 	{
 		return 0;
 	}
+}
+
+/*================EIS======================*/
+
+void _parseEISParams(command_t *pCommandParams, String pCommandString)
+{
+	String tParamArray[6];
+
+	_separateCommandParameters(tParamArray, pCommandString, ',', 6);
+
+	pCommandParams->id = CMDID_EIS;
+	pCommandParams->settlingTime = tParamArray[0].toInt();
+	pCommandParams->startFrequency = tParamArray[1].toFloat();
+	pCommandParams->endFrequency = tParamArray[2].toFloat();
+	pCommandParams->numPoints = tParamArray[3].toInt();
+	pCommandParams->amplitude = tParamArray[4].toFloat();
+	pCommandParams->sampleDuration = tParamArray[5].toInt();
+
+	return;
 }

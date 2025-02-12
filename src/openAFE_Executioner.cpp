@@ -276,3 +276,35 @@ int _setCurrentRange(AFE *pOpenafeInstance, command_t *pCommandParams)
 		return ERROR_GENERAL;
 	}
 }
+
+/*================EIS======================*/
+int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
+{	
+	if (pOpenafeInstance)
+	{
+		int tResult = pOpenafeInstance->setEISSequence(
+			pCommandParams->settlingTime,
+			pCommandParams->startFrequency,
+			pCommandParams->endFrequency,
+			pCommandParams->numPoints,
+			pCommandParams->amplitude,
+			pCommandParams->sampleDuration);
+
+		if (tResult <= 0) {
+			return ERROR_PARAM_OUT_BOUNDS;
+		} else {
+			pinMode(2, INPUT);
+			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); // Config the Arduino Interrupt
+
+			pOpenafeInstance->startImpedancy();
+
+			return STATUS_VOLTAMMETRY_UNDERGOING;
+		}
+	}
+	else
+	{
+		return ERROR_GENERAL;
+	}
+
+	return ERROR_GENERAL; // JUST FOR TESTING
+}
