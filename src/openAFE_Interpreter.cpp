@@ -5,6 +5,8 @@
 
 #include "openAFE_Error_Codes.h"
 
+// ==== PRIVATE ==== //
+
 /**
  * @brief Gets the command ID of a given command string.
  *
@@ -61,6 +63,14 @@ void _parseDPVParams(command_t *pCommandParams, String pCommandString);
 void _parseSWVParams(command_t *pCommandParams, String pCommandString);
 
 /**
+ * @brief Parse impedance spectroscopy parameters.
+ * 
+ * @param pCommandParams OUT -- Command parameters struct.
+ * @param pCommandString IN -- Command message string.
+ */
+void _parseEISParams(command_t *pCommandParams, String pCommandString);
+
+/**
  * @brief Parse TIA Gain command parameters.
  * 
  * @param pCommandParams OUT -- Command parameters struct.
@@ -94,9 +104,13 @@ uint8_t _getCRCIntegerFromString(String pString)
 
 	return tIntegerChecksum;
 }
+// ====         ==== //
 
-bool openAFEInterpreter_isCommandCRCValid(String pCommand)
-{
+
+
+// ==== PUBLIC ==== //
+
+bool openAFEInterpreter_isCommandCRCValid(String pCommand){
 	uint8_t tCommandLength = pCommand.length();
 
 	char tCommandArray[tCommandLength + 1];
@@ -117,8 +131,7 @@ bool openAFEInterpreter_isCommandCRCValid(String pCommand)
 	return isCommandValid;
 }
 
-int openAFEInterpreter_getParametersFromCommand(String pCommandString, command_t *pCommandParams)
-{
+int openAFEInterpreter_getParametersFromCommand(String pCommandString, command_t *pCommandParams){
 	int interpreterResult = 0;
 
 	memset(pCommandParams, 0x0, sizeof(command_t));
@@ -129,149 +142,17 @@ int openAFEInterpreter_getParametersFromCommand(String pCommandString, command_t
 
 	if (!tCommandId)
 		return ERROR_INVALID_COMMAND;
-
+  
 	interpreterResult = _populateCommandParameters(tCommandId, pCommandParams, pCommandString);
 
 	return interpreterResult;
 }
 
-int _populateCommandParameters(uint8_t pCommandId, command_t *pCommandParams, String pCommandString)
-{
-	int returnValue = 1;
+// ====        ==== //
 
-	switch (pCommandId)
-	{
-	case CMDID_CHK:
-		pCommandParams->id = CMDID_CHK;
-		break;
 
-	case CMDID_DIE:
-		pCommandParams->id = CMDID_DIE;
-		break;
 
-	case CMDID_TIA:
-		pCommandParams->id = CMDID_TIA;
-		_parseTIAParams(pCommandParams, pCommandString);
-		break;
-
-	case CMDID_CUR:
-		_parseCurrentRangeParams(pCommandParams, pCommandString);
-		break;
-
-	case CMDID_CVW:
-		_parseCVParams(pCommandParams, pCommandString);
-		break;
-	
-	case CMDID_DPV:
-		_parseDPVParams(pCommandParams, pCommandString);
-		break;
-
-	case CMDID_SWV:
-		_parseSWVParams(pCommandParams, pCommandString);
-		break;
-
-	default:
-		returnValue = ERROR_INVALID_COMMAND;
-		break;
-	}
-
-	return returnValue;
-}
-
-void _parseCVParams(command_t *pCommandParams, String pCommandString)
-{
-	String tParamArray[6];
-
-	_separateCommandParameters(tParamArray, pCommandString, ',', 6);
-
-	pCommandParams->id = CMDID_CVW;
-	pCommandParams->settlingTime = tParamArray[0].toInt();
-	pCommandParams->startingPotential = tParamArray[1].toFloat();
-	pCommandParams->endingPotential = tParamArray[2].toFloat();
-	pCommandParams->scanRate = tParamArray[3].toFloat();
-	pCommandParams->stepSize = tParamArray[4].toFloat();
-	pCommandParams->numCycles = tParamArray[5].toInt();
-
-	return;
-}
-
-void _parseDPVParams(command_t *pCommandParams, String pCommandString)
-{
-	String tParamArray[9];
-
-	_separateCommandParameters(tParamArray, pCommandString, ',', 9);
-
-	pCommandParams->id = CMDID_DPV;
-	pCommandParams->settlingTime = tParamArray[0].toInt();
-	pCommandParams->startingPotential = tParamArray[1].toFloat();
-	pCommandParams->endingPotential = tParamArray[2].toFloat();
-	pCommandParams->pulseAmplitude = tParamArray[3].toFloat();
-	pCommandParams->stepSize = tParamArray[4].toFloat();
-	pCommandParams->pulseWidth = tParamArray[5].toInt();
-	pCommandParams->baseWidth = tParamArray[6].toInt();
-	pCommandParams->samplePeriodPulse = tParamArray[7].toInt();
-	pCommandParams->samplePeriodBase = tParamArray[8].toInt();
-
-	return;
-}
-
-void _parseSWVParams(command_t *pCommandParams, String pCommandString)
-{
-	String tParamArray[7];
-
-	_separateCommandParameters(tParamArray, pCommandString, ',', 7);
-
-	pCommandParams->id = CMDID_SWV;
-	pCommandParams->settlingTime = tParamArray[0].toInt();
-	pCommandParams->startingPotential = tParamArray[1].toFloat();
-	pCommandParams->endingPotential = tParamArray[2].toFloat();
-	pCommandParams->scanRate = tParamArray[3].toFloat();
-	pCommandParams->pulseAmplitude = tParamArray[4].toFloat();
-	pCommandParams->pulseFrequency = tParamArray[5].toFloat();
-	pCommandParams->samplePeriodPulse = tParamArray[6].toInt();
-
-	return;
-}
-
-void _parseTIAParams(command_t *pCommandParams, String pCommandString)
-{
-	String tParamsArray[2];
-	
-	_separateCommandParameters(tParamsArray, pCommandString, ',', 2);
-
-	pCommandParams->id = CMDID_TIA;
-	pCommandParams->gainTIA = tParamsArray[1].toInt();
-
-	return;
-}
-
-void _parseCurrentRangeParams(command_t *pCommandParams, String pCommandString)
-{
-	String tParamsArray[2];
-
-	_separateCommandParameters(tParamsArray, pCommandString, ',', 2);
-	pCommandParams->id = CMDID_CUR;
-	pCommandParams->currentRange = tParamsArray[1].toInt();
-
-	return;
-}
-
-void _separateCommandParameters(String pParamArray[], String pCommandString, char pSeparator, uint8_t pNumParams)
-{
-	char charData[pCommandString.length() + 1];
-	pCommandString.toCharArray(charData, sizeof(charData));
-
-	char *token = strtok(charData, &pSeparator);
-	token = strtok(NULL, &pSeparator); // ditches the suffix and the command code "$CMD"
-	int i = 0;
-
-	while (token != NULL && i < pNumParams)
-	{
-		pParamArray[i] = String(token);
-		token = strtok(NULL, &pSeparator);
-		i++;
-	}
-}
+// ==== PRIVATE ==== //
 
 uint8_t _getCommandIdFromString(String pCommandString)
 {
@@ -299,6 +180,10 @@ uint8_t _getCommandIdFromString(String pCommandString)
 	else if (strcmp(tFirstCommandCode, "SWV") == 0)
 	{
 		return CMDID_SWV;
+	}
+  else if (strcmp(tFirstCommandCode, "EIS") == 0)
+	{
+		return CMDID_EIS;
 	}
 	else if (strcmp(tFirstCommandCode, "CMD") == 0)
 	{
@@ -339,3 +224,196 @@ uint8_t _getCommandIdFromString(String pCommandString)
 		return 0;
 	}
 }
+
+int _populateCommandParameters(uint8_t pCommandId, command_t *pCommandParams, String pCommandString){
+	int returnValue = 1;
+
+	switch (pCommandId)
+	{
+	case CMDID_CHK:
+		pCommandParams->id = CMDID_CHK;
+		break;
+
+	case CMDID_DIE:
+		pCommandParams->id = CMDID_DIE;
+		break;
+
+	case CMDID_TIA:
+		pCommandParams->id = CMDID_TIA;
+		_parseTIAParams(pCommandParams, pCommandString);
+		break;
+
+	case CMDID_CUR:
+		_parseCurrentRangeParams(pCommandParams, pCommandString);
+		break;
+
+	case CMDID_CVW:
+		_parseCVParams(pCommandParams, pCommandString);
+		break;
+	
+	case CMDID_DPV:
+		_parseDPVParams(pCommandParams, pCommandString);
+		break;
+
+	case CMDID_SWV:
+		_parseSWVParams(pCommandParams, pCommandString);
+		break;
+  
+  case CMDID_EIS:
+		_parseEISParams(pCommandParams, pCommandString);
+		break;
+
+	default:
+		returnValue = ERROR_INVALID_COMMAND;
+		break;
+	}
+
+	return returnValue;
+}
+
+void _parseCVParams(command_t *pCommandParams, String pCommandString){
+
+	String tParamArray[6];
+
+	_separateCommandParameters(tParamArray, pCommandString, ',', 6);
+
+	pCommandParams->id = CMDID_CVW;
+	pCommandParams->settlingTime = tParamArray[0].toInt();
+	pCommandParams->startingPotential = tParamArray[1].toFloat();
+	pCommandParams->endingPotential = tParamArray[2].toFloat();
+	pCommandParams->scanRate = tParamArray[3].toFloat();
+	pCommandParams->stepSize = tParamArray[4].toFloat();
+	pCommandParams->numCycles = tParamArray[5].toInt();
+
+	return;
+}
+
+void _parseDPVParams(command_t *pCommandParams, String pCommandString){
+
+  //Serial.print("Recebido para DPV: ");
+  //Serial.println(pCommandString);
+
+  String tParamArray[9];
+
+  _separateCommandParameters(tParamArray, pCommandString, ',', 9);
+
+  pCommandParams->id = CMDID_DPV;
+  pCommandParams->settlingTime = tParamArray[0].toInt();
+  pCommandParams->startingPotential = tParamArray[1].toFloat();
+  pCommandParams->endingPotential = tParamArray[2].toFloat();
+  pCommandParams->pulseAmplitude = tParamArray[3].toFloat();
+  pCommandParams->stepSize = tParamArray[4].toFloat();
+  pCommandParams->pulseWidth = tParamArray[5].toInt();
+  pCommandParams->baseWidth = tParamArray[6].toInt();
+  pCommandParams->samplePeriodPulse = tParamArray[7].toInt();
+  pCommandParams->samplePeriodBase = tParamArray[8].toInt();
+
+}
+
+void _parseSWVParams(command_t *pCommandParams, String pCommandString){
+	String tParamArray[7];
+
+	_separateCommandParameters(tParamArray, pCommandString, ',', 7);
+
+	pCommandParams->id = CMDID_SWV;
+	pCommandParams->settlingTime = tParamArray[0].toInt();
+	pCommandParams->startingPotential = tParamArray[1].toFloat();
+	pCommandParams->endingPotential = tParamArray[2].toFloat();
+	pCommandParams->scanRate = tParamArray[3].toFloat();
+	pCommandParams->pulseAmplitude = tParamArray[4].toFloat();
+	pCommandParams->pulseFrequency = tParamArray[5].toFloat();
+	pCommandParams->samplePeriodPulse = tParamArray[6].toInt();
+
+	return;
+}
+
+void _parseEISParams(command_t *pCommandParams, String pCommandString){
+	String tParamArray[5];
+
+	_separateCommandParameters(tParamArray, pCommandString, ',', 5);
+
+	pCommandParams->id = CMDID_EIS;
+	pCommandParams->settlingTime = tParamArray[0].toInt();
+	pCommandParams->startingOmega = tParamArray[1].toInt();
+	pCommandParams->endingOmega = tParamArray[2].toInt();
+	pCommandParams->stepForADecade = tParamArray[3].toInt();
+	pCommandParams->scanRate = tParamArray[4].toFloat();
+
+	return;
+}
+
+void _parseTIAParams(command_t *pCommandParams, String pCommandString){
+	String tParamsArray[2];
+	
+	_separateCommandParameters(tParamsArray, pCommandString, ',', 2);
+
+	pCommandParams->id = CMDID_TIA;
+	pCommandParams->gainTIA = tParamsArray[1].toInt();
+
+	return;
+}
+
+void _parseCurrentRangeParams(command_t *pCommandParams, String pCommandString){
+	String tParamsArray[2];
+
+	_separateCommandParameters(tParamsArray, pCommandString, ',', 2);
+	pCommandParams->id = CMDID_CUR;
+	pCommandParams->currentRange = tParamsArray[1].toInt();
+
+	return;
+}
+
+void _separateCommandParameters(String pParamArray[], String pCommandString, char pSeparator, uint8_t pNumParams) {
+  // Debug
+  //Serial.print(F("Comando recebido: "));
+  //Serial.println(pCommandString);
+
+  // Find first comma and asterisk
+  int startPos = pCommandString.indexOf(',');
+  int endPos = pCommandString.indexOf('*');
+  
+  if (startPos == -1 || endPos == -1) {
+    Serial.println(F("Error: invalid command format"));
+    return;
+  }
+
+  // Extract parameters section
+  String paramsStr = pCommandString.substring(startPos + 1, endPos);
+  
+  // Debug
+  //Serial.print(F("Parametros: "));
+  //Serial.println(paramsStr);
+
+  // Clear parameter array
+  for (uint8_t i = 0; i < pNumParams; i++) {
+    pParamArray[i] = "";
+  }
+
+  // Parse parameters manually without using multiple indexOf calls
+  uint8_t paramIndex = 0;
+  int strLen = paramsStr.length();
+  int lastComma = 0;
+  
+  // Handle each parameter
+  for (int i = 0; i < strLen && paramIndex < pNumParams; i++) {
+    if (paramsStr[i] == ',' || i == strLen - 1) {
+      // Extract parameter
+      if (i == strLen - 1 && paramsStr[i] != ',') {
+        // Include last character if at end of string
+        pParamArray[paramIndex] = paramsStr.substring(lastComma, i + 1);
+      } else {
+        pParamArray[paramIndex] = paramsStr.substring(lastComma, i);
+      }
+      
+      lastComma = i + 1;
+      paramIndex++;
+    }
+  }
+
+  // Verify we got all parameters
+  if (paramIndex < pNumParams) {
+    Serial.println(F("Warning: fewer parameters than expected"));
+  }
+}
+
+// ====         ==== //

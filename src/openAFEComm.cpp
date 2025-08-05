@@ -109,6 +109,16 @@ void _MSG_endOfVoltammetry(void)
 }
 
 /**
+ * @brief Send message to the App that the wave generation is finished.
+ *
+ */
+void _MSG_endOfSpectroscopy(void)
+{
+	_sendMessage("MSG,END");
+	return;
+}
+
+/**
  * @brief Sends the proper error message accorrding to the error code passed.
  *
  * @param pErrorCode IN -- Code of the error ocurred, e.g.: -1 (ERROR_INVALID_COMMAND).
@@ -155,6 +165,46 @@ void _sendSinglePointResult(float pVoltage_mV, float pCurrent_uA)
 	_sendMessage(tSinglePointResult);
 }
 
+/**
+ * @brief Send a single point impedance result (EOT) to the App, with the given parameters 
+ * and also check for incoming messages from the App, and send command to executioner,
+ * if valid.
+ * 
+ * @param pOmega IN -- Omega level in Hz.
+ * @param pRealZ_Ohm In -- Real Impedance in .
+ * @param pImagZ_Ohm In -- imaginary Impedance in .
+ */
+void _sendSinglePointImpedanceResult(int pOmega_Hz, float pRealZ_Ohm, int pImagZ_Ohm)
+{
+	noInterrupts();
+	if (Serial.available() > 0)
+	{
+		// Read user input string
+		String tCommandReceived = Serial.readStringUntil('\n');
+		// Remove trailing newline character
+		tCommandReceived.trim();
+
+		if(openAFEInterpreter_isCommandCRCValid(tCommandReceived))
+		{
+			int tInterpretResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams);
+
+			if (tInterpretResult < 0) 
+			{
+				_ERR_HANDLER(tInterpretResult);
+			} 
+			else 
+			{
+				int tExecutionResult = openAFEExecutioner_executeCommand(&gOpenafeInstance, &commandParams);
+
+				if (tExecutionResult < 0) _ERR_HANDLER(tExecutionResult);
+			}
+		}
+	}
+	interrupts();
+
+	String tSinglePointResult = "EOT," + String(pOmega_Hz) + "," + String(pRealZ_Ohm)+ "," + String(pImagZ_Ohm); 
+	_sendMessage(tSinglePointResult);
+}
 
 int _handlePoint(AFE *pOpenafeInstance)
 {
@@ -180,6 +230,30 @@ int _handlePoint(AFE *pOpenafeInstance)
 	return EXE_CVW_DONE;
 }
 
+int _handlePointImpedance(AFE *pOpenafeInstance)
+{
+	do
+	{
+		if (pOpenafeInstance->dataAvailable() > 0)
+		{
+			noInterrupts(); // Disable interrupts while reading data FIFO
+
+			int omega_Hz;
+			float realZ_Ohm;
+      float imagZ_ohm;
+			//pOpenafeInstance->getPointImpedance(&omega_Hz, &realZ_Ohm, &imagZ_Ohm);
+			interrupts(); // Enable back interrupts after reading data from FIFO
+
+			_sendSinglePointImpedanceResult(omega_Hz, realZ_Ohm, imagZ_ohm);
+		}
+		delay(1);
+
+	} while (!pOpenafeInstance->done());
+
+	detachInterrupt(digitalPinToInterrupt(2));
+
+	return EXE_EIS_DONE;
+}
 
 void openAFEComm_waitForCommands(AFE *pOpenafeInstance)
 {
@@ -212,26 +286,27 @@ void openAFEComm_waitForCommands(AFE *pOpenafeInstance)
 
 			int tInterpreterResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams);
 
-			if(tInterpreterResult < 0) {
+			if(tInterpreterResult < 0) 
 				_ERR_HANDLER(tInterpreterResult);
-			} 
-			if (commandParams.id == CMDID_CVW || commandParams.id == CMDID_DPV || commandParams.id == CMDID_SWV)
+			if (commandParams.id == CMDID_CVW || commandParams.id == CMDID_DPV || commandParams.id == CMDID_SWV || commandParams.id == CMDID_EIS)
 				_MSG_received();
 
 			int tExeResult = openAFEExecutioner_executeCommand(&gOpenafeInstance, &commandParams);
 
-			if (tExeResult == STATUS_VOLTAMMETRY_UNDERGOING)
-			{
-				tExeResult = _handlePoint(&gOpenafeInstance);
-			} 
-			
-			if (tExeResult < 0) {
+			if (tExeResult == STATUS_VOLTAMMETRY_UNDERGOING) 
+        tExeResult = _handlePoint(&gOpenafeInstance);
+      else if (tExeResult == STATUS_SPECTROSCOPY_UNDERGOING) 
+        tExeResult = _handlePointImpedance(&gOpenafeInstance);
+      
+			if (tExeResult < 0) 
 				_ERR_HANDLER(tExeResult);
-			} else if ((tExeResult == EXE_CVW_DONE) || (tExeResult == EXE_DPV_DONE) || (tExeResult == EXE_SWV_DONE)){
+			else if ((tExeResult == EXE_CVW_DONE) || (tExeResult == EXE_DPV_DONE) || (tExeResult == EXE_SWV_DONE))
 				_MSG_endOfVoltammetry();
-			} else {
+      else if ((tExeResult == EXE_EIS_DONE))
+        _MSG_endOfSpectroscopy();
+      else 
 				_MSG_received();
-			}
+			
 		}
 		else
 		{

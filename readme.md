@@ -17,6 +17,7 @@ Now in Arduino IDE, got to File>Examples>openafe_comm>openafe_communication to o
 - CVW - Cyclic Voltammetry Wave, sends the parameters and start the voltammetry, if possible.
 - DPV - Differential Pulse Voltage, sends the parameters and start the voltammetry, if possible.
 - SWV - Square Wave Voltammetry, sends the parameters and start the voltammetry, if possible.
+- EIS - Impedance Spectroscopy, sends the parameters and start the spectroscopy, if possible.
 ## Standard Commands
 > Standard commands have CMD preceding the command code in the command message, for example: `$CMD,RUN*81`.
 - RUN - Run (start) the voltammetry process (sequencer only).
@@ -28,6 +29,7 @@ Now in Arduino IDE, got to File>Examples>openafe_comm>openafe_communication to o
 # List of Messages (MCU to App)
 ## Special Messages
 - SGL - Single point result, has the voltage and current of a single point of the voltammetry.
+- EOT - Single point impedance result, has the omega and impedance of a single point of the spectroscopy.
 - MLT - Multi point result, has the voltage and current of multiple points of the voltammetry.
 ## Standard Messages
 > Standard messages have a MSG preceding the message code, for example: `$MSG,RDY*3A`.

@@ -7,6 +7,8 @@
 #include "Arduino.h"
 // #include <stdint.h>
 
+// ==== PRIVATE ==== //
+
 void (*gPointResultMessageCallback)(float, float);
 
 /**
@@ -64,6 +66,11 @@ int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pComm
 int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams);
 
 /**
+ *
+ */
+int _executeImpedanceSpectroscopy(AFE *pOpenafeInstance, command_t *pCommandParams);
+
+/**
  * @brief Set the TIA Gain Resistor.
  * 
  * @param pOpenafeInstance IN -- OpenAFE device instance.
@@ -81,17 +88,20 @@ int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams);
  */
 int _setCurrentRange(AFE *pOpenafeInstance, command_t *pCommandParams);
 
+// ====         ==== //
 
-void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(float, float))
-{
+
+
+// ==== PUBLIC ==== //
+
+void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(float, float)){
 	gPointResultMessageCallback = pPointResultMessageCallback;
 }
 
-int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommandParams)
-{
+int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommandParams){
 	// DEBUG:
-	// Serial.print("EXE command ID: ");
-	// Serial.println(pCommandParams.id);
+	// Serial.print("EXE command ID:");
+	// Serial.println(pCommandParams->id);
 
 	switch (pCommandParams->id)
 	{
@@ -119,6 +129,10 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 		return _executeSquareWaveVoltammetry(pOpenafeInstance, pCommandParams);
 		break;
 
+  case CMDID_EIS:
+		return _executeImpedanceSpectroscopy(pOpenafeInstance, pCommandParams);
+		break;
+
 	case CMDID_CUR:
 		return _setCurrentRange(pOpenafeInstance, pCommandParams);
 		break;
@@ -129,8 +143,13 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 	}
 }
 
-int _checkAFEHealth(AFE *pOpenafeInstance)
-{
+// ====        ==== //
+
+
+
+// ==== PRIVATE ==== //
+
+int _checkAFEHealth(AFE *pOpenafeInstance){
 	if(pOpenafeInstance)
 	{
 		if (pOpenafeInstance->isAFEResponding()) {
@@ -144,8 +163,7 @@ int _checkAFEHealth(AFE *pOpenafeInstance)
 	return ERROR_AFE_NOT_WORKING;
 }
 
-int _stopVoltammetry(AFE *pOpenafeInstance)
-{
+int _stopVoltammetry(AFE *pOpenafeInstance){
 	if (pOpenafeInstance)
 	{
 		pOpenafeInstance->killVoltammetry();
@@ -153,13 +171,11 @@ int _stopVoltammetry(AFE *pOpenafeInstance)
 	return 1;
 }
 
-void _handlePointResult(float pVoltage_mV, float pCurrent_uA)
-{
+void _handlePointResult(float pVoltage_mV, float pCurrent_uA){
 	gPointResultMessageCallback(pVoltage_mV, pCurrent_uA);
 }
 
-int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
-{	
+int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams){	
 	if (pOpenafeInstance)
 	{
 		int tResult = pOpenafeInstance->setCVSequence(
@@ -189,19 +205,19 @@ int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
 	return ERROR_GENERAL; // JUST FOR TESTING
 }
 
-int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
-{
+int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams){
 	if (pOpenafeInstance)
 	{
-		uint8_t tResult = pOpenafeInstance->setDPVSequence(pCommandParams->settlingTime,
-															 pCommandParams->startingPotential,
-															 pCommandParams->endingPotential,
-															 pCommandParams->pulseAmplitude,
-															 pCommandParams->stepSize,
-															 pCommandParams->pulseWidth,
-															 pCommandParams->baseWidth,
-															 pCommandParams->samplePeriodPulse,
-															 pCommandParams->samplePeriodBase);
+		uint8_t tResult = pOpenafeInstance->setDPVSequence(
+      pCommandParams->settlingTime,
+      pCommandParams->startingPotential,
+      pCommandParams->endingPotential,
+      pCommandParams->pulseAmplitude,
+      pCommandParams->stepSize,
+      pCommandParams->pulseWidth,
+      pCommandParams->baseWidth,
+      pCommandParams->samplePeriodPulse,
+      pCommandParams->samplePeriodBase);
 
 		if (tResult <= 0)
 		{
@@ -223,8 +239,7 @@ int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pComm
 	}
 }
 
-int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams)
-{
+int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams){
 	if (pOpenafeInstance)
 	{
 		uint8_t tResult = pOpenafeInstance->setSWVSequence(pCommandParams->settlingTime,
@@ -255,8 +270,36 @@ int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandPara
 	}
 }
 
-int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams)
-{
+int _executeImpedanceSpectroscopy(AFE *pOpenafeInstance, command_t *pCommandParams){
+  if (pOpenafeInstance)
+	{
+		int tResult; /*= pOpenafeInstance->setCVSequence(
+			pCommandParams->settlingTime,
+			pCommandParams->startingOmega,
+			pCommandParams->endingOmega,
+			pCommandParams->stepForADecade,
+      pCommandParams->scanRate);*/
+
+		if (tResult <= 0) {
+			return ERROR_PARAM_OUT_BOUNDS;
+		} else {
+			pinMode(2, INPUT);
+			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); // Config the Arduino Interrupt
+
+			//pOpenafeInstance->startSpectroscopy();
+
+			return STATUS_SPECTROSCOPY_UNDERGOING;
+		}
+	}
+	else
+	{
+		return ERROR_GENERAL;
+	}
+
+	return ERROR_GENERAL; // JUST FOR TESTING
+}
+
+int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams){
 	if (pOpenafeInstance)
 	{
 		pOpenafeInstance->setTIAGain(pCommandParams->gainTIA);
@@ -266,8 +309,7 @@ int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams)
 	}
 }
 
-int _setCurrentRange(AFE *pOpenafeInstance, command_t *pCommandParams)
-{
+int _setCurrentRange(AFE *pOpenafeInstance, command_t *pCommandParams){
 	if (pOpenafeInstance)
 	{
 		pOpenafeInstance->setCurrentRange(pCommandParams->currentRange);
@@ -276,3 +318,5 @@ int _setCurrentRange(AFE *pOpenafeInstance, command_t *pCommandParams)
 		return ERROR_GENERAL;
 	}
 }
+
+// ====         ==== //

@@ -11,6 +11,7 @@
 #define CMDID_CVW 4u	// Feed CV parameters, check possibility of the wave and start the voltammetry.
 #define CMDID_DPV 5u 	// Feed DPV parameters, check possibility of the wave and start the voltammetry.
 #define CMDID_SWV 6u	// Feed SW parameters, check possibility of the wave and start the voltammetry.
+#define CMDID_EIS 7u // Feed EIS parameters, check possibility of the wave and start the Spectroscopy.
 
 #define CMDID_TIA 10u // Command to change the Transimpedance Amplifier gain resistor.
 #define CMDID_CUR 11u // Command to change the TIA gain resistor using the current as the parameter.
@@ -22,8 +23,11 @@
 #define EXE_CVW_DONE 200u // Execution of Cyclic voltammetry finished.
 #define EXE_DPV_DONE 201u // Execution of Differential Pulse voltammetry finished.
 #define EXE_SWV_DONE 202u // Execution of Square wave voltammetry finished.
+#define EXE_EIS_DONE 203u // Execution of Impedance spectroscopy finished.
 
-#define STATUS_VOLTAMMETRY_UNDERGOING 210u // The Voltammetry process is currently in progress.
+#define STATUS_VOLTAMMETRY_UNDERGOING  210u // The Voltammetry process is currently in progress.
+#define STATUS_SPECTROSCOPY_UNDERGOING 211u // The Impedance process is currently in progress.
+
 
 // YOU MAY WANT TO TAKE A LOOK AT THIS:
 // https://bitbucket.org/moduhub/pstat1fw-git/src/master/src/main.c
@@ -33,22 +37,25 @@
  */
 struct command_t
 {
-	uint8_t id;				 // Command ID.
-	uint16_t settlingTime;	 // Settling time, in milliseconds.
-	float startingPotential; // Starting potential, in mV.
-	float endingPotential;	 // Ending potential, in mV.
-	float scanRate;			 // Scan rate, in mV.
-	float stepSize;			 // Step size, in mV.
-	uint8_t numCycles;		 // Number of cycles.
-	uint16_t numPoints;		 // Number of points.
-	float pulseAmplitude;	 // Pulse amplitude in mV.
-	uint16_t gainTIA;		 // TIA gain.
-	uint16_t currentRange;	 // AFE current range, in uA.	
-	uint16_t pulseWidth; 	 // Pulse top width, in milliseconds.
-	uint16_t baseWidth;		 // Base width, in milliseconds.
+	uint8_t id;				          // Command ID.
+	uint16_t settlingTime;	    // Settling time, in milliseconds.
+	float startingPotential;    // Starting potential, in mV.
+	float endingPotential;	    // Ending potential, in mV.
+  int startingOmega;          // Starting omega, in Hz.
+  int endingOmega;            // Ending omega, in Hz.
+  int stepForADecade;         // Number of steps per decade
+	float scanRate;		       	  // Scan rate, in mV.
+	float stepSize;			        // Step size, in mV.
+	uint8_t numCycles;		      // Number of cycles.
+	uint16_t numPoints;		      // Number of points.
+	float pulseAmplitude;	      // Pulse amplitude in mV.
+	uint16_t gainTIA;		        // TIA gain.
+	uint16_t currentRange;	    // AFE current range, in uA.	
+	uint16_t pulseWidth; 	      // Pulse top width, in milliseconds.
+	uint16_t baseWidth;		      // Base width, in milliseconds.
 	uint16_t samplePeriodPulse; // Sample time before the pulse go down.
 	uint16_t samplePeriodBase;	// Sample time before the pulse go up.
-	float pulseFrequency;		// Pulse frequency, in Hertz.
+	float pulseFrequency;		    // Pulse frequency, in Hertz.
 };
 
 #endif // _OPENAFE_SHARED_
