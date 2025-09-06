@@ -2,7 +2,8 @@
 #define _OPENAFE_EXECUTIONER_
 
 #include "openafe.h"
-#include "openAFE_Shared.h"
+#include "../openAFEComm_Shared.hpp"
+#include "Arduino.h"
 
 /**
  * @brief Set the callback to pass the point result up. The callback function should be of void 
@@ -35,7 +36,7 @@ int _checkAFEHealth(AFE *pOpenafeInstance);
  * @param pOpenafeInstance IN -- OpenAFE class instance.
  * @return 
  */
-int _stopVoltammetry(AFE *pOpenafeInstance);
+int killProcess(AFE *pOpenafeInstance);
 
 /**
  * @brief Handle the received point result from voltammetry proccess.

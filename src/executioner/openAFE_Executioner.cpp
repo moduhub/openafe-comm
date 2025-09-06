@@ -1,11 +1,4 @@
-#include "openAFE_Executioner.h"
-
-#include "openAFE.h"
-#include "openAFE_Shared.h"
-#include "openAFE_Error_Codes.h"
-
-#include "Arduino.h"
-// #include <stdint.h>
+#include "openAFE_Executioner.hpp"
 
 void (*gPointResultMessageCallback)(float, float);
 
@@ -16,18 +9,14 @@ void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessage
 }
 
 int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommandParams){
-	// DEBUG:
-	// Serial.print("EXE command ID:");
-	// Serial.println(pCommandParams->id);
 
-	switch (pCommandParams->id)
-	{
+	switch (pCommandParams->id){
 	case CMDID_CHK:
 		return _checkAFEHealth(pOpenafeInstance);
 		break;
 	
 	case CMDID_DIE:
-		return _stopVoltammetry(pOpenafeInstance);
+		return killProcess(pOpenafeInstance);
 		break;
 
 	case CMDID_TIA:
@@ -80,11 +69,9 @@ int _checkAFEHealth(AFE *pOpenafeInstance){
 	return ERROR_AFE_NOT_WORKING;
 }
 
-int _stopVoltammetry(AFE *pOpenafeInstance){
-	if (pOpenafeInstance)
-	{
-		pOpenafeInstance->killVoltammetry();
-	}
+int killProcess(AFE *pOpenafeInstance){
+	if (pOpenafeInstance) pOpenafeInstance->killVoltammetry();
+  asm volatile ("  jmp 0");
 	return 1;
 }
 
@@ -93,98 +80,67 @@ void _handlePointResult(float pVoltage_mV, float pCurrent_uA){
 }
 
 int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams){	
-	if (pOpenafeInstance)
-	{
+
+	if (pOpenafeInstance){
 		int tResult = pOpenafeInstance->setCVSequence(
-			pCommandParams->settlingTime,
-			pCommandParams->startingPotential,
-			pCommandParams->endingPotential,
-			pCommandParams->scanRate,
-			pCommandParams->stepSize,
-			pCommandParams->numCycles);
+      pCommandParams->settlingTime,
+      pCommandParams->startingPotential, pCommandParams->endingPotential,
+      pCommandParams->scanRate, pCommandParams->stepPotential,
+      pCommandParams->numCycles
+    );
 
-		if (tResult <= 0) {
-			return ERROR_PARAM_OUT_BOUNDS;
-		} else {
+		if (tResult <= 0) return ERROR_PARAM_OUT_BOUNDS;
+		else {
 			pinMode(2, INPUT);
-			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); // Config the Arduino Interrupt
-
+			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); 
 			pOpenafeInstance->startVoltammetry();
-
 			return STATUS_VOLTAMMETRY_UNDERGOING;
 		}
 	}
-	else
-	{
-		return ERROR_GENERAL;
-	}
+	else return ERROR_GENERAL;
 
 	return ERROR_GENERAL; // JUST FOR TESTING
 }
 
 int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams){
-	if (pOpenafeInstance)
-	{
+
+	if (pOpenafeInstance){
 		uint8_t tResult = pOpenafeInstance->setDPVSequence(
       pCommandParams->settlingTime,
-      pCommandParams->startingPotential,
-      pCommandParams->endingPotential,
-      pCommandParams->pulseAmplitude,
-      pCommandParams->stepSize,
-      pCommandParams->pulseWidth,
-      pCommandParams->baseWidth,
-      pCommandParams->samplePeriodPulse,
-      pCommandParams->samplePeriodBase);
+      pCommandParams->startingPotential, pCommandParams->endingPotential,
+      pCommandParams->scanRate, pCommandParams->stepPotential, pCommandParams->pulsePotential,
+      pCommandParams->dutyCycle 
+    );
 
-		if (tResult <= 0)
-		{
-			return ERROR_PARAM_OUT_BOUNDS;
-		}
-		else
-		{
+		if (tResult <= 0) return ERROR_PARAM_OUT_BOUNDS;
+		else {
 			pinMode(2, INPUT);
-			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); // Config the Arduino Interrupt
-
+			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); 
 			pOpenafeInstance->startVoltammetry();
-
 			return STATUS_VOLTAMMETRY_UNDERGOING;
 		}
 	}
-	else
-	{
-		return ERROR_GENERAL;
-	}
+	else return ERROR_GENERAL;
 }
 
 int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams){
-	if (pOpenafeInstance)
-	{
-		uint8_t tResult = pOpenafeInstance->setSWVSequence(pCommandParams->settlingTime,
-															 pCommandParams->startingPotential,
-															 pCommandParams->endingPotential,
-															 pCommandParams->scanRate,
-															 pCommandParams->pulseAmplitude,
-															 pCommandParams->pulseFrequency,
-															 pCommandParams->samplePeriodPulse);
+	if (pOpenafeInstance){
+		uint8_t tResult = pOpenafeInstance->setSWVSequence(
+      pCommandParams->settlingTime,
+      pCommandParams->startingPotential, pCommandParams->endingPotential,
+      pCommandParams->scanRate, pCommandParams->stepPotential, pCommandParams->pulsePotential,
+      pCommandParams->dutyCycle 
+    );
 
-		if (tResult <= 0)
-		{
-			return ERROR_PARAM_OUT_BOUNDS;
-		}
-		else
-		{
+		if (tResult <= 0) return ERROR_PARAM_OUT_BOUNDS;
+		else{
 			pinMode(2, INPUT);
-			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); // Config the Arduino Interrupt
-
+			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); 
 			pOpenafeInstance->startVoltammetry();
-
 			return STATUS_VOLTAMMETRY_UNDERGOING;
 		}
 	}
-	else
-	{
-		return ERROR_GENERAL;
-	}
+	else return ERROR_GENERAL;
 }
 
 int _executeImpedanceSpectroscopy(AFE *pOpenafeInstance, command_t *pCommandParams){

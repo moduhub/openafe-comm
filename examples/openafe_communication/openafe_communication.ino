@@ -1,16 +1,12 @@
-#include <openAFEComm.h>
-#include <openafe.h>
+#include <openAFEComm.hpp>
+//#include <openafe.h>
 
-AFE openafe;
-
-void setup() 
-{
+void setup() {
 	Serial.begin(115200);
 
-	openAFEComm_waitForCommands(&openafe);
+	openAFEComm_waitForCommands();
 }
 
-void loop() 
-{
+void loop() {
 	// woah, such empty :O
 }
