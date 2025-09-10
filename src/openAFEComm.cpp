@@ -5,49 +5,63 @@ static command_t commandParams;
 AFE openafe;
 
 void sendPoint(float pVoltage_mV, float pCurrent_uA){
-	noInterrupts();
-	if (Serial.available() > 0){
-		// Read user input string
-		String tCommandReceived = Serial.readStringUntil('\n');
-		// Remove trailing newline character
-		tCommandReceived.trim();
-
-		if(checkCRC(tCommandReceived)){
-			int tInterpretResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams);
-
-			if (tInterpretResult < 0) sendError(tInterpretResult);
-			else {
-				int tExecutionResult = openAFEExecutioner_executeCommand(&openafe, &commandParams);
-				if (tExecutionResult < 0) sendError(tExecutionResult);
-			}
-		}
-	}
-	interrupts();
-
-	String tSinglePointResult = "SGL," + String(pVoltage_mV) + "," + String(pCurrent_uA); 
-	sendMessage(tSinglePointResult);
+  String tSinglePointResult = "SGL," + String(pVoltage_mV) + "," + String(pCurrent_uA);
+  sendMessage(tSinglePointResult);
 }
 
 int handlePoint(AFE *pOpenafeInstance){
-	do{
-		if (pOpenafeInstance->dataAvailable() > 0){
-			noInterrupts(); // Disable interrupts while reading data FIFO
+  char cmdBuf[128];
+  size_t cmdIdx = 0;
 
-			float voltages[2];
+  do {
+    if (pOpenafeInstance->dataAvailable() > 0) {
+      noInterrupts();
+      float voltages[2];
       float currents[2];
       pOpenafeInstance->getPoint(voltages, currents);
+      interrupts();
 
-			interrupts(); // Enable back interrupts after reading data from FIFO
-
-			sendPoint(voltages[0], currents[0]);
-      if(commandParams.id == CMDID_DPV || commandParams.id == CMDID_SWV)
+      sendPoint(voltages[0], currents[0]);
+      if (commandParams.id == CMDID_DPV || commandParams.id == CMDID_SWV)
         sendPoint(voltages[1], currents[1]);
-		}
-		delay(1);
-	} while (!pOpenafeInstance->done());
-	detachInterrupt(digitalPinToInterrupt(2));
+    }
 
-	return EXE_CVW_DONE;
+    while (Serial.available() > 0) {
+      int c = Serial.read();
+      if (c < 0) break;
+      if (c == '\r') continue;       
+      if (c == '\n') {
+        cmdBuf[cmdIdx] = '\0';
+        if (cmdIdx > 0) {
+          String tCommandReceived = String(cmdBuf);
+          tCommandReceived.trim();
+          if (checkCRC(tCommandReceived)) {
+            int tInterpretResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams);
+            if (tInterpretResult < 0) {
+              sendError(tInterpretResult);
+            } else {
+              int tExecutionResult = openAFEExecutioner_executeCommand(&openafe, &commandParams);
+              if (tExecutionResult < 0) sendError(tExecutionResult);
+            }
+          } else {
+            sendError(ERROR_INVALID_COMMAND);
+          }
+        }
+        cmdIdx = 0;
+      } else {
+          if (cmdIdx < sizeof(cmdBuf) - 1) {
+              cmdBuf[cmdIdx++] = (char)c;
+          } else {
+              cmdIdx = 0;
+          }
+      }
+    }
+
+    delay(1);
+  } while (!pOpenafeInstance->done());
+
+  detachInterrupt(digitalPinToInterrupt(2));
+  return EXE_CVW_DONE;
 }
 
 void openAFEComm_waitForCommands(void){
@@ -58,9 +72,9 @@ void openAFEComm_waitForCommands(void){
 	while (1){
 		String tCommandReceived;
 
-		while (Serial.available() == 0);                 // Wait for user input
+		while (Serial.available() == 0); // Wait for user input
 		tCommandReceived = Serial.readStringUntil('\n'); // Read user input string
-		tCommandReceived.trim();                         // Remove trailing newline character
+		tCommandReceived.trim(); // Remove trailing newline character
 
 		if (checkCRC(tCommandReceived)){
       
