@@ -1,3 +1,6 @@
+#ifndef _OPENAFE_SERIAL_
+#define _OPENAFE_SERIAL_
+
 #include "Arduino.h"
 
 #include "../util/CRC.hpp"
@@ -93,3 +96,5 @@ void sendPointDPV(float pVoltage_mV, float pCurrent_uA, float pCurrent_uA_2);
  * @param pCurrent_uA_2 - Second Current in uA
  */
 void sendPointSW(float pVoltage_mV, float pCurrent_uA, float pCurrent_uA_2);
+
+#endif //_OPENAFE_SERIAL_

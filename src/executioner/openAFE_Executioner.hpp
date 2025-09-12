@@ -3,6 +3,9 @@
 
 #include "openafe.h"
 #include "../openAFEComm_Shared.hpp"
+#include "../interpreter/openAFE_Interpreter.hpp"
+#include "../serial/openAFE_Serial.hpp"
+#include "../util/CRC.hpp"
 #include "Arduino.h"
 
 /**
@@ -23,6 +26,11 @@ void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessage
 int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommandParams);
 
 /**
+ * @brief
+ */
+int handlePoint(AFE *pOpenafeInstance, command_t *commandParams);
+
+/**
  * @brief Check the value in the AFE IC ADIID register. If the AFE IC does
  * not give the expected 0x4144 then something is wrong. 
  * 
@@ -36,7 +44,7 @@ int _checkAFEHealth(AFE *pOpenafeInstance);
  * @param pOpenafeInstance IN -- OpenAFE class instance.
  * @return 
  */
-int killProcess(AFE *pOpenafeInstance);
+int _killProcess(AFE *pOpenafeInstance);
 
 /**
  * @brief Handle the received point result from voltammetry proccess.
