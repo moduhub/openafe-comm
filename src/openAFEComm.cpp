@@ -89,14 +89,19 @@ void openAFEComm_waitForCommands(void){
 
 			int tExeResult = openAFEExecutioner_executeCommand(&openafe, &commandParams);
 
-			if (tExeResult == STATUS_VOLTAMMETRY_UNDERGOING) 
+			if (tExeResult == STATUS_VOLTAMMETRY_UNDERGOING) {
+        send_msg_startingVoltammetry();
         tExeResult = handlePoint(&openafe);
-      else if (tExeResult == STATUS_SPECTROSCOPY_UNDERGOING); 
+      }
+      //else if (tExeResult == STATUS_SPECTROSCOPY_UNDERGOING); 
+      // send_msg_startingSpectroscoy();
       //  tExeResult = handlePointImpedance(&openafe);
       
 			if (tExeResult < 0) sendError(tExeResult);
 			else if (tExeResult == EXE_CVW_DONE) send_msg_endOfVoltammetry();
-      else if (tExeResult == EXE_EIS_DONE) send_endOfSpectroscopy();
+      //else if (tExeResult == EXE_EIS_DONE) send_msg_endOfSpectroscopy();
+      else if(tExeResult == CMDID_CUR_SETTED) send_msg_CURUpdate();
+      else if(tExeResult == CMDID_TIA_SETTED) send_msg_TIAUpdate();
       else send_msg_received();
 			
 		}

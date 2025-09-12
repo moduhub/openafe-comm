@@ -45,7 +45,25 @@ void send_msg_startingVoltammetry(void);
 void send_msg_endOfVoltammetry(void);
 
 /**
- * @brief Send message to the App that the wave generation is finished.
+ * @brief Send message to the App that the spectroscopy is starting.
  *
  */
-void send_endOfSpectroscopy(void);
+void send_msg_startingSpectroscoy(void);
+
+/**
+ * @brief Send message to the App that the spectroscopy is finished.
+ *
+ */
+void send_msg_endOfSpectroscopy(void);
+
+/**
+ * @brief send a command to serial, indicating that the CUR has been modified successfully
+ *
+ */
+void send_msg_CURUpdate(void);
+
+/**
+ * @brief Send a command to serial, indicating that the TIA has been modified successfully
+ *
+ */
+void send_msg_TIAUpdate(void);

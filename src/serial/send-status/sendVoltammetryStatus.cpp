@@ -1,7 +1,7 @@
 #include "../openAFE_Serial.hpp"
 
 void send_msg_startingVoltammetry(void){
-	sendMessage("MSG,STR");
+	sendMessage("MSG,CVS");
 	return;
 }
 
