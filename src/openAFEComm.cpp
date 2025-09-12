@@ -60,6 +60,9 @@ int handlePoint(AFE *pOpenafeInstance){
     delay(1);
   } while (!pOpenafeInstance->done());
 
+  Serial.flush();
+  delay(10);// GArantir que todos os dados serão enviados pela serial
+
   detachInterrupt(digitalPinToInterrupt(2));
   return EXE_CVW_DONE;
 }
@@ -97,13 +100,14 @@ void openAFEComm_waitForCommands(void){
       // send_msg_startingSpectroscoy();
       //  tExeResult = handlePointImpedance(&openafe);
       
+      Serial.flush();
+      delay(30);
 			if (tExeResult < 0) sendError(tExeResult);
 			else if (tExeResult == EXE_CVW_DONE) send_msg_endOfVoltammetry();
       //else if (tExeResult == EXE_EIS_DONE) send_msg_endOfSpectroscopy();
       else if(tExeResult == CMDID_CUR_SETTED) send_msg_CURUpdate();
       else if(tExeResult == CMDID_TIA_SETTED) send_msg_TIAUpdate();
       else send_msg_received();
-			
 		}
 		else sendError(ERROR_INVALID_COMMAND);
 	}

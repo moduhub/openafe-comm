@@ -13,6 +13,7 @@ void sendMessage(String pMessage){
 	String tMessageToSend = '$' + pMessage + '*' + tChecksumString + '\n';
 
 	Serial.print(tMessageToSend);
+  Serial.flush();
 
 	return;
 }

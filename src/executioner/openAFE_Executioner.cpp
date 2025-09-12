@@ -71,6 +71,7 @@ int _checkAFEHealth(AFE *pOpenafeInstance){
 
 int killProcess(AFE *pOpenafeInstance){
 	if (pOpenafeInstance) pOpenafeInstance->killVoltammetry();
+  delay(100);
   asm volatile ("  jmp 0");
 	return 1;
 }
