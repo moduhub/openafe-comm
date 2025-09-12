@@ -2,7 +2,11 @@
 #define _OPENAFE_EXECUTIONER_
 
 #include "openafe.h"
-#include "openAFE_Shared.h"
+#include "../openAFEComm_Shared.hpp"
+#include "../interpreter/openAFE_Interpreter.hpp"
+#include "../serial/openAFE_Serial.hpp"
+#include "../util/CRC.hpp"
+#include "Arduino.h"
 
 /**
  * @brief Set the callback to pass the point result up. The callback function should be of void 
@@ -11,7 +15,7 @@
  *
  * @param pPointResultMessageCallback IN -- Callback to the function to send the SGL point message.
  */
-void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(float, float));
+void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(int, float, float, float));
 
 /**
  * @brief Execute a received command with parameters.
@@ -20,6 +24,11 @@ void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessage
  * @return >0 If successful, error code on error. 
  */
 int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommandParams);
+
+/**
+ * @brief
+ */
+int handlePoint(AFE *pOpenafeInstance, command_t *commandParams);
 
 /**
  * @brief Check the value in the AFE IC ADIID register. If the AFE IC does
@@ -35,15 +44,17 @@ int _checkAFEHealth(AFE *pOpenafeInstance);
  * @param pOpenafeInstance IN -- OpenAFE class instance.
  * @return 
  */
-int _stopVoltammetry(AFE *pOpenafeInstance);
+int _killProcess(AFE *pOpenafeInstance);
 
 /**
  * @brief Handle the received point result from voltammetry proccess.
  * 
+ * @param cmdId IN -- Command ID of the ongoing process (CMDID_CVW, CMDID_DPV, CMDID_SWV)
  * @param pVoltage_mV IN -- Voltage level in millivolts.
  * @param pCurrent_uA IN -- Current in microAmps.
+  * @param pCurrent_uA_2 IN -- Second Current in microAmps (for DPV and SWV).
  */
-void _handlePointResult(float pVoltage_mV, float pCurrent_uA);
+void _handlePointResult(int cmdId, float vpVoltage_mV1, float pCurrent_uA, float pCurrent_uA_2);
 
 /**
  * @brief Executes the Cyclic Voltammetry with the received parameters.
