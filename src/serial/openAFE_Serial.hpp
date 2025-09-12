@@ -67,3 +67,29 @@ void send_msg_CURUpdate(void);
  *
  */
 void send_msg_TIAUpdate(void);
+
+/**
+ * @brief Sends a CV point via serial
+ *
+ * @param pVoltage_mV - Voltage in mV
+ * @param pCurrent_uA - Current in uA
+ */
+void sendPointCV(float pVoltage_mV, float pCurrent_uA);
+
+/**
+ * @brief Sends a DPV point via serial
+ *
+ * @param pVoltage_mV - Voltage in mV
+ * @param pCurrent_uA - Current in uA
+ * @param pCurrent_uA_2 - Second Current in uA
+ */
+void sendPointDPV(float pVoltage_mV, float pCurrent_uA, float pCurrent_uA_2);
+
+/**
+ * @brief Sends a SW point via serial
+ *
+ * @param pVoltage_mV - Voltage in mV
+ * @param pCurrent_uA - Current in uA
+ * @param pCurrent_uA_2 - Second Current in uA
+ */
+void sendPointSW(float pVoltage_mV, float pCurrent_uA, float pCurrent_uA_2);
