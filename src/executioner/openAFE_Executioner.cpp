@@ -1,11 +1,15 @@
 #include "openAFE_Executioner.hpp"
 
-void (*gPointResultMessageCallback)(float, float);
+// ==== PRIVATE ==== //
+
+void (*gPointResultMessageCallback)(int cmdId, float v1, float c1, float c2);
+
+// ====         ==== //
 
 // ==== PUBLIC ==== //
 
-void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(float, float)){
-	gPointResultMessageCallback = pPointResultMessageCallback;
+void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(int, float, float, float)) {
+  gPointResultMessageCallback = pPointResultMessageCallback;
 }
 
 int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommandParams){
@@ -76,8 +80,10 @@ int killProcess(AFE *pOpenafeInstance){
 	return 1;
 }
 
-void _handlePointResult(float pVoltage_mV, float pCurrent_uA){
-	gPointResultMessageCallback(pVoltage_mV, pCurrent_uA);
+void _handlePointResult(int cmdId, float vpVoltage_mV1, float pCurrent_uA, float pCurrent_uA_2){
+  if (gPointResultMessageCallback) {
+    gPointResultMessageCallback(cmdId, vpVoltage_mV1, pCurrent_uA, pCurrent_uA_2);
+  }
 }
 
 int _executeCyclicVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams){	

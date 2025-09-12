@@ -16,14 +16,12 @@ int handlePoint(AFE *pOpenafeInstance){
   do {
     if (pOpenafeInstance->dataAvailable() > 0) {
       noInterrupts();
-      float voltages[2];
-      float currents[2];
-      pOpenafeInstance->getPoint(voltages, currents);
+      float voltage_mV;
+      float currents_uA[2];
+      pOpenafeInstance->getPoint(&voltage_mV, currents_uA);
       interrupts();
 
-      sendPoint(voltages[0], currents[0]);
-      if (commandParams.id == CMDID_DPV || commandParams.id == CMDID_SWV)
-        sendPoint(voltages[1], currents[1]);
+      _handlePointResult(commandParams.id, voltage_mV, currents_uA[0], currents_uA[1]);
     }
 
     while (Serial.available() > 0) {
@@ -81,7 +79,15 @@ void openAFEComm_waitForCommands(void){
 
 		if (checkCRC(tCommandReceived)){
       
-			openAFEExecutioner_setPointResultMessageCallback(sendPoint);
+			openAFEExecutioner_setPointResultMessageCallback([](int cmdId, float v1, float c1, float c2) {
+        if (cmdId == CMDID_CVW) {
+          sendPointCV(v1, c1);
+        } else if (cmdId == CMDID_DPV) {
+          sendPointDPV(v1, c1, c2);
+        } else if (cmdId == CMDID_SWV) {
+          sendPointSW(v1, c1, c2);
+        }
+      });
 
 			int tInterpreterResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams);
 
