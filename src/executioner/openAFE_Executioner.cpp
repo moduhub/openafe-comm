@@ -177,7 +177,7 @@ int _setTIAGainResistor(AFE *pOpenafeInstance, command_t *pCommandParams){
 	if (pOpenafeInstance)
 	{
 		pOpenafeInstance->setTIAGain(pCommandParams->gainTIA);
-		return 1;
+		return CMDID_TIA_SETTED;
 	} else {
 		return ERROR_GENERAL;
 	}
@@ -187,7 +187,7 @@ int _setCurrentRange(AFE *pOpenafeInstance, command_t *pCommandParams){
 	if (pOpenafeInstance)
 	{
 		pOpenafeInstance->setCurrentRange(pCommandParams->currentRange);
-		return 1;
+		return CMDID_CUR_SETTED;
 	} else {
 		return ERROR_GENERAL;
 	}
