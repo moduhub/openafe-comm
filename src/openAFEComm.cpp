@@ -4,11 +4,6 @@ static command_t commandParams;
 
 AFE openafe;
 
-void sendPoint(float pVoltage_mV, float pCurrent_uA){
-  String tSinglePointResult = "SGL," + String(pVoltage_mV) + "," + String(pCurrent_uA);
-  sendMessage(tSinglePointResult);
-}
-
 int handlePoint(AFE *pOpenafeInstance){
   char cmdBuf[128];
   size_t cmdIdx = 0;
