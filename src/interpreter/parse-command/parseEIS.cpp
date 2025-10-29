@@ -10,7 +10,7 @@ void _parseEISParams(command_t *pCommandParams, String pCommandString){
 	pCommandParams->startingOmega = tParamArray[1].toInt();
 	pCommandParams->endingOmega = tParamArray[2].toInt();
 	pCommandParams->stepForADecade = tParamArray[3].toInt();
-	pCommandParams->scanRate = tParamArray[4].toFloat();
-
+	pCommandParams->samplesPerFrequency = tParamArray[4].toInt();
+  
 	return;
 }

@@ -47,21 +47,22 @@
  */
 struct command_t
 {
-	uint8_t id;				          // Command ID.
-	uint16_t settlingTime;	    // Settling time, in milliseconds.
-	float startingPotential;    // Starting potential, in mV.
-	float endingPotential;	    // Ending potential, in mV.
-  int startingOmega;          // Starting omega, in Hz.
-  int endingOmega;            // Ending omega, in Hz.
-  int stepForADecade;         // Number of steps per decade
-	float scanRate;		       	  // Scan rate, in mV.
-	float stepPotential;			  // Step size, in mV.
-  float pulsePotential;       //
-	uint8_t numCycles;		      // Number of cycles.
-	uint16_t numPoints;		      // Number of points.
-	uint16_t gainTIA;		        // TIA gain.
-	uint16_t currentRange;	    // AFE current range, in uA.	
-  float dutyCycle;            //
+	uint8_t id;				            // Command ID.
+	uint16_t settlingTime;	      // Settling time, in milliseconds.
+	float startingPotential;      // Starting potential, in mV.
+	float endingPotential;	      // Ending potential, in mV.
+  int startingOmega;            // Starting omega, in Hz.
+  int endingOmega;              // Ending omega, in Hz.
+  int stepForADecade;           // Number of steps per decade
+	float scanRate;		       	    // Scan rate, in mV.
+  uint16_t samplesPerFrequency; // Samples per Frequency
+	float stepPotential;			    // Step size, in mV.
+  float pulsePotential;         //
+	uint8_t numCycles;		        // Number of cycles.
+	uint16_t numPoints;		        // Number of points.
+	uint16_t gainTIA;		          // TIA gain.
+	uint16_t currentRange;	      // AFE current range, in uA.	
+  float dutyCycle;              // 
 };
 
 #endif // _OPENAFE_SHARED_
