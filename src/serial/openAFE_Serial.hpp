@@ -97,4 +97,13 @@ void sendPointDPV(float pVoltage_mV, float pCurrent_uA, float pCurrent_uA_2);
  */
 void sendPointSW(float pVoltage_mV, float pCurrent_uA, float pCurrent_uA_2);
 
+/**
+ * @brief Sends an EIS point via serial
+ *
+ * @param frequency_Hz - Frequency in Hz
+ * @param impedance_real - Real part of impedance
+ * @param impedance_imag - Imaginary part of impedance
+ */
+void sendPointEIS(float frequency_Hz, float impedance_real, float impedance_imag);
+
 #endif //_OPENAFE_SERIAL_

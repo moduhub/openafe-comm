@@ -31,6 +31,18 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 int handlePoint(AFE *pOpenafeInstance, command_t *commandParams);
 
 /**
+ * @brief Handle incoming point results during an EIS run.
+ *
+ * This function drives the loop that reads points from the AFE in impedance
+ * spectroscopy mode and dispatches them through the registered point callback.
+ *
+ * @param pOpenafeInstance IN -- OpenAFE class instance.
+ * @param commandParams IN -- Command parameters struct.
+ * @return >0 if successful, error code on error.
+ */
+int handlePointEIS(AFE *pOpenafeInstance, command_t *commandParams);
+
+/**
  * @brief Check the value in the AFE IC ADIID register. If the AFE IC does
  * not give the expected 0x4144 then something is wrong. 
  * 
