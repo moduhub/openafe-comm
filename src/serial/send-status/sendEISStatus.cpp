@@ -1,7 +1,7 @@
 #include "../openAFE_Serial.hpp"
 
 void send_msg_startingSpectroscoy(void){
-	sendMessage("MSG,CVS");
+	sendMessage("MSG,EISS");
 	return;
 }
 
