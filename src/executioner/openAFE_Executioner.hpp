@@ -15,7 +15,11 @@
  *
  * @param pPointResultMessageCallback IN -- Callback to the function to send the SGL point message.
  */
-void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(int, float, float, float));
+void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(
+  int, 
+  float, float, float,
+  float, float, float
+));
 
 /**
  * @brief Execute a received command with parameters.
@@ -62,11 +66,13 @@ int _killProcess(AFE *pOpenafeInstance);
  * @brief Handle the received point result from voltammetry proccess.
  * 
  * @param cmdId IN -- Command ID of the ongoing process (CMDID_CVW, CMDID_DPV, CMDID_SWV)
- * @param pVoltage_mV IN -- Voltage level in millivolts.
- * @param pCurrent_uA IN -- Current in microAmps.
-  * @param pCurrent_uA_2 IN -- Second Current in microAmps (for DPV and SWV).
+ * 
  */
-void _handlePointResult(int cmdId, float vpVoltage_mV1, float pCurrent_uA, float pCurrent_uA_2);
+void _handlePointResult(
+  int cmdId, 
+  float voltage, float current_1, float current_2,
+  float frequency, float impedance_real, float impedance_imag
+);
 
 /**
  * @brief Executes the Cyclic Voltammetry with the received parameters.

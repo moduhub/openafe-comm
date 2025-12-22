@@ -18,13 +18,20 @@ void openAFEComm_waitForCommands(void){
 
 		if (checkCRC(tCommandReceived)){
       
-			openAFEExecutioner_setPointResultMessageCallback([](int cmdId, float v1, float c1, float c2) {
+			openAFEExecutioner_setPointResultMessageCallback([]
+        (
+          int cmdId, 
+          float voltage, float current_1, float current_2, 
+          float frequency, float impedance_real, float impedance_imag
+        ) {
         if (cmdId == CMDID_CVW) {
-          sendPointCV(v1, c1);
+          sendPointCV(voltage, current_1);
         } else if (cmdId == CMDID_DPV) {
-          sendPointDPV(v1, c1, c2);
+          sendPointDPV(voltage, current_1, current_2);
         } else if (cmdId == CMDID_SWV) {
-          sendPointSW(v1, c1, c2);
+          sendPointSW(voltage, current_1, current_2);
+        } else if (cmdId == CMDID_EIS) {
+          sendPointEIS(frequency, impedance_real, impedance_imag);
         }
       });
 
@@ -36,20 +43,21 @@ void openAFEComm_waitForCommands(void){
 				send_msg_received();
 
 			int tExeResult = openAFEExecutioner_executeCommand(&openafe, &commandParams);
-
+      
 			if (tExeResult == STATUS_VOLTAMMETRY_UNDERGOING) {
         send_msg_startingVoltammetry();
         tExeResult = handlePoint(&openafe, &commandParams);
       }
-      //else if (tExeResult == STATUS_SPECTROSCOPY_UNDERGOING); 
-      // send_msg_startingSpectroscoy();
-      //  tExeResult = handlePointImpedance(&openafe);
+      else if(tExeResult == STATUS_SPECTROSCOPY_UNDERGOING){
+        send_msg_startingSpectroscoy();
+        tExeResult = handlePointEIS(&openafe, &commandParams);
+      }
       
       Serial.flush();
       delay(30);
 			if (tExeResult < 0) sendError(tExeResult);
 			else if (tExeResult == EXE_CVW_DONE) send_msg_endOfVoltammetry();
-      //else if (tExeResult == EXE_EIS_DONE) send_msg_endOfSpectroscopy();
+      else if (tExeResult == EXE_EIS_DONE) send_msg_endOfSpectroscopy();
       else if(tExeResult == CMDID_CUR_SETTED) send_msg_CURUpdate();
       else if(tExeResult == CMDID_TIA_SETTED) send_msg_TIAUpdate();
       else send_msg_received();
