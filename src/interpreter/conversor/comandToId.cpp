@@ -1,7 +1,7 @@
 #include "../openAFE_interpreter.hpp"
 
 uint8_t commandToId(const String& pCommandString) {
-  if (pCommandString.length() < 4) return 0; // segurança
+  if (pCommandString.length() < 4) return 0;
 
   const char* cmd = pCommandString.c_str();
 

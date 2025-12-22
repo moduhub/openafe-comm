@@ -2,27 +2,22 @@
 
 int _executeImpedanceSpectroscopy(AFE *pOpenafeInstance, command_t *pCommandParams){
   if (pOpenafeInstance){
-    
-		int tResult = pOpenafeInstance->setEISSequence(
+		int tResult = pOpenafeInstance->setEISConfig(
       pCommandParams->settlingTime,
       pCommandParams->startingOmega,
       pCommandParams->endingOmega,
-      pCommandParams->stepForADecade,
-      pCommandParams->samplesPerFrequency
+      pCommandParams->stepForADecade
     );
-
-      Serial.println("Chegou aqui");
-      while(1); // WP //
 
 		if (tResult <= 0) {
 			return ERROR_PARAM_OUT_BOUNDS;
 		} else {
-			pinMode(2, INPUT);
-			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); // Config the Arduino Interrupt
-
-			//pOpenafeInstance->startSpectroscopy();
-
-			return STATUS_SPECTROSCOPY_UNDERGOING;
+			pinMode(2, INPUT_PULLUP);
+			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler_EIS, FALLING); // Config the Arduino Interrupt
+      delay(10);
+      pOpenafeInstance->startEIS();
+      interrupts();
+      return STATUS_SPECTROSCOPY_UNDERGOING;
 		}
 	}
 	else

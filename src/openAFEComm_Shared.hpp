@@ -51,9 +51,9 @@ struct command_t
 	uint16_t settlingTime;	      // Settling time, in milliseconds.
 	float startingPotential;      // Starting potential, in mV.
 	float endingPotential;	      // Ending potential, in mV.
-  int startingOmega;            // Starting omega, in Hz.
-  int endingOmega;              // Ending omega, in Hz.
-  int stepForADecade;           // Number of steps per decade
+  uint16_t startingOmega;       // Starting omega, in Hz.
+  uint16_t endingOmega;         // Ending omega, in Hz.
+  uint16_t stepForADecade;      // Number of steps per decade
 	float scanRate;		       	    // Scan rate, in mV.
   uint16_t samplesPerFrequency; // Samples per Frequency
 	float stepPotential;			    // Step size, in mV.
