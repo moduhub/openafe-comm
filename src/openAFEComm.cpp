@@ -8,6 +8,18 @@ void openAFEComm_waitForCommands(void){
 	if(!Serial) return;
 	
 	send_ready();
+
+  //  [WP] Send EIS example
+  // $EIS,1000,20,60000,10*
+  /*
+  String pMessage = "EIS,1000,20,60000,10";
+  char tChecksumArr[3];
+  sprintf(tChecksumArr, "%02x", calculateCRC(pMessage));
+	String tChecksumString = String(tChecksumArr);
+	tChecksumString.toUpperCase();
+	String tMessageToSend = '$' + pMessage + '*' + tChecksumString + '\n';
+  Serial.print(tMessageToSend);
+  */
   
 	while (1){
 		String tCommandReceived;
