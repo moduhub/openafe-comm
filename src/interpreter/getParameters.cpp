@@ -40,6 +40,6 @@ int openAFEInterpreter_getParametersFromCommand(const String& pCommandString, co
       return 1;
 
     default:
-        return ERROR_INVALID_COMMAND;
+      return ERROR_INVALID_COMMAND;
   }
 }
