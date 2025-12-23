@@ -14,6 +14,7 @@ int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandPara
 			pinMode(2, INPUT);
 			attachInterrupt(digitalPinToInterrupt(2), pOpenafeInstance->interruptHandler, LOW); 
 			pOpenafeInstance->startVoltammetry();
+      interrupts();
 			return STATUS_VOLTAMMETRY_UNDERGOING;
 		}
 	}
