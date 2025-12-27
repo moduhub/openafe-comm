@@ -98,14 +98,18 @@ int handlePointEIS(AFE *pOpenafeInstance, command_t *commandParams){
       float frequency_Hz;
       float impedance_real;
       float impedance_imag;
-      pOpenafeInstance->getPoint_EIS(&frequency_Hz, &impedance_real, &impedance_imag);
+      uint8_t bCalibration;
+      pOpenafeInstance->getPoint_EIS(&frequency_Hz, &impedance_real, &impedance_imag, &bCalibration);
       interrupts();        
 
-      _handlePointResult(
-        commandParams->id, 
-        0, 0, 0,
-        frequency_Hz, impedance_real, impedance_imag
-      );
+      if(!bCalibration){
+        _handlePointResult(
+          commandParams->id, 
+          0, 0, 0,
+          frequency_Hz, impedance_real, impedance_imag
+        );
+      }
+      
     }
 
     while (Serial.available() > 0) {
