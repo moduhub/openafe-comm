@@ -105,7 +105,12 @@ int _executeDifferentialPulseVoltammetry(AFE *pOpenafeInstance, command_t *pComm
 int _executeSquareWaveVoltammetry(AFE *pOpenafeInstance, command_t *pCommandParams);
 
 /**
- *
+ * @brief Executes the EIS with the received parameters.
+ * The function will return error code in case of any error. 
+ * 
+ * @param pOpenafeInstance IN -- OpenAFE device instance.
+ * @param pCommandParams IN -- Command parameters struct.
+ * @return >0 if successful, error code on error.
  */
 int _executeImpedanceSpectroscopy(AFE *pOpenafeInstance, command_t *pCommandParams);
 
