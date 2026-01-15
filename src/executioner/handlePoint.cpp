@@ -1,19 +1,19 @@
 #include "openAFE_Executioner.hpp"
 
 void (*gPointResultMessageCallback)(
-  int cmdId, 
+  int cmdId,
   float voltage, float current_1, float current_2,
   float frequency, float impedance_real, float impedance_imag
 );
 
 void _handlePointResult(
-  int cmdId, 
+  int cmdId,
   float voltage, float current_1, float current_2,
   float frequency, float impedance_real, float impedance_imag
 ){
   if (gPointResultMessageCallback) {
     gPointResultMessageCallback(
-      cmdId, 
+      cmdId,
       voltage, current_1, current_2,
       frequency, impedance_real, impedance_imag
     );
@@ -21,36 +21,56 @@ void _handlePointResult(
 }
 
 void openAFEExecutioner_setPointResultMessageCallback(void (*pPointResultMessageCallback)(
-  int, 
-  float, float, float, 
+  int,
+  float, float, float,
   float, float, float
 )) {
   gPointResultMessageCallback = pPointResultMessageCallback;
 }
 
-int handlePoint(AFE *pOpenafeInstance, command_t *commandParams){
+static int handlePointUnified(AFE *pOpenafeInstance, command_t *commandParams, bool isEIS) {
   char cmdBuf[128];
   size_t cmdIdx = 0;
 
   do {
-    if (pOpenafeInstance->dataAvailable() > 0) {
-      noInterrupts();
-      float voltage_mV;
-      float currents_uA[2];
-      pOpenafeInstance->getPoint(&voltage_mV, currents_uA);
-      interrupts();
+    if (isEIS) {
+      if (pOpenafeInstance->dataAvailable_EIS() > 0) {
+        noInterrupts();
+        float frequency_Hz;
+        float impedance_real;
+        float impedance_imag;
+        uint8_t bCalibration;
+        pOpenafeInstance->getPoint_EIS(&frequency_Hz, &impedance_real, &impedance_imag, &bCalibration);
+        interrupts();
 
-      _handlePointResult(
-        commandParams->id, 
-        voltage_mV, currents_uA[0], currents_uA[1], 
-        0, 0, 0
-      );
+        if (!bCalibration) {
+          _handlePointResult(
+            commandParams->id,
+            0.0f, 0.0f, 0.0f,
+            frequency_Hz, impedance_real, impedance_imag
+          );
+        }
+      }
+    } else {
+      if (pOpenafeInstance->dataAvailable() > 0) {
+        noInterrupts();
+        float voltage_mV;
+        float currents_uA[2];
+        pOpenafeInstance->getPoint(&voltage_mV, currents_uA);
+        interrupts();
+
+        _handlePointResult(
+          commandParams->id,
+          voltage_mV, currents_uA[0], currents_uA[1],
+          0.0f, 0.0f, 0.0f
+        );
+      }
     }
 
     while (Serial.available() > 0) {
       int c = Serial.read();
       if (c < 0) break;
-      if (c == '\r') continue;       
+      if (c == '\r') continue;
       if (c == '\n') {
         cmdBuf[cmdIdx] = '\0';
         if (cmdIdx > 0) {
@@ -59,97 +79,39 @@ int handlePoint(AFE *pOpenafeInstance, command_t *commandParams){
           if (checkCRC(tCommandReceived)) {
             int tInterpretResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, commandParams);
             if (tInterpretResult < 0) {
-              sendError(tInterpretResult);
+              sendStatus((status_id_t)tInterpretResult);
             } else {
               int tExecutionResult = openAFEExecutioner_executeCommand(pOpenafeInstance, commandParams);
-              if (tExecutionResult < 0) sendError(tExecutionResult);
+              if (tExecutionResult < 0) sendStatus((status_id_t)tExecutionResult);
             }
           } else {
-            sendError(ERROR_INVALID_COMMAND);
+            sendStatus((status_id_t)ERROR_INVALID_COMMAND);
           }
         }
         cmdIdx = 0;
       } else {
-          if (cmdIdx < sizeof(cmdBuf) - 1) {
-              cmdBuf[cmdIdx++] = (char)c;
-          } else {
-              cmdIdx = 0;
-          }
+        if (cmdIdx < sizeof(cmdBuf) - 1) {
+          cmdBuf[cmdIdx++] = (char)c;
+        } else {
+          cmdIdx = 0;
+        }
       }
     }
 
     delay(1);
-  } while (!pOpenafeInstance->done());
+  } while ( isEIS ? !pOpenafeInstance->doneEIS() : !pOpenafeInstance->done() );
 
   Serial.flush();
-  delay(10);// GArantir que todos os dados serão enviados pela serial
-
+  delay(10);
   detachInterrupt(digitalPinToInterrupt(2));
+
   return EXE_CVW_DONE;
 }
 
+int handlePoint(AFE *pOpenafeInstance, command_t *commandParams){
+  return handlePointUnified(pOpenafeInstance, commandParams, false);
+}
+
 int handlePointEIS(AFE *pOpenafeInstance, command_t *commandParams){
-  char cmdBuf[128];
-  size_t cmdIdx = 0;
-
-  do {
-    if (pOpenafeInstance->dataAvailable_EIS() > 0) {
-      noInterrupts();
-      float frequency_Hz;
-      float impedance_real;
-      float impedance_imag;
-      uint8_t bCalibration;
-      pOpenafeInstance->getPoint_EIS(&frequency_Hz, &impedance_real, &impedance_imag, &bCalibration);
-      interrupts();        
-
-      if(!bCalibration){
-        _handlePointResult(
-          commandParams->id, 
-          0, 0, 0,
-          frequency_Hz, impedance_real, impedance_imag
-        );
-      }
-      
-    }
-
-    while (Serial.available() > 0) {
-      int c = Serial.read();
-      if (c < 0) break;
-      if (c == '\r') continue;       
-      if (c == '\n') {
-        cmdBuf[cmdIdx] = '\0';
-        if (cmdIdx > 0) {
-          String tCommandReceived = String(cmdBuf);
-          tCommandReceived.trim();
-          if (checkCRC(tCommandReceived)) {
-            int tInterpretResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, commandParams);
-            if (tInterpretResult < 0) {
-              sendError(tInterpretResult);
-            } else {
-              int tExecutionResult = openAFEExecutioner_executeCommand(pOpenafeInstance, commandParams);
-              if (tExecutionResult < 0) sendError(tExecutionResult);
-            }
-          } else {
-            sendError(ERROR_INVALID_COMMAND);
-          }
-        }
-        cmdIdx = 0;
-      } else {
-          if (cmdIdx < sizeof(cmdBuf) - 1) {
-              cmdBuf[cmdIdx++] = (char)c;
-          } else {
-              cmdIdx = 0;
-          }
-      }
-    }
-
-
-    delay(1);
-  } while (!pOpenafeInstance->doneEIS()); 
-
-  Serial.flush();
-  delay(10);// GArantir que todos os dados serão enviados pela serial
-
-  detachInterrupt(digitalPinToInterrupt(2));
-  return EXE_CVW_DONE;
+  return handlePointUnified(pOpenafeInstance, commandParams, true);
 }

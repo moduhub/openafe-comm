@@ -16,27 +16,29 @@ int openAFEInterpreter_getParametersFromCommand(const String& pCommandString, co
       return 1; 
 
     case CMDID_TIA:
-      _parseTIAParams(pCommandParams, pCommandString);
+      // [removed] The memory of the Arduino R3 is limiting processes; the TIA and CUR settings were removed to gain more space.
+      //_parseTIAParams(pCommandParams, pCommandString);
       return 1;
 
     case CMDID_CUR:
-      _parseCurrentRangeParams(pCommandParams, pCommandString);
+      // [removed] The memory of the Arduino R3 is limiting processes; the TIA and CUR settings were removed to gain more space.
+      // _parseCurrentRangeParams(pCommandParams, pCommandString);
       return 1;
 
     case CMDID_CVW:
-      _parseCVParams(pCommandParams, pCommandString);
+      _parseParams(pCommandParams, pCommandString, CMDID_CVW);
       return 1;
 
     case CMDID_DPV:
-      _parseDPVParams(pCommandParams, pCommandString);
+      _parseParams(pCommandParams, pCommandString, CMDID_DPV);
       return 1;
 
     case CMDID_SWV:
-      _parseSWVParams(pCommandParams, pCommandString);
+      _parseParams(pCommandParams, pCommandString, CMDID_SWV);
       return 1;
 
     case CMDID_EIS:
-      _parseEISParams(pCommandParams, pCommandString);
+      _parseParams(pCommandParams, pCommandString, CMDID_EIS);
       return 1;
 
     default:

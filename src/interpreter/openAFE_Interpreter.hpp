@@ -36,36 +36,12 @@ uint8_t commandToId(const String& pCommandString);
 void separateCommandParameters(String pParamArray[], String pCommandString, char pSeparator, uint8_t pNumParams);
 
 /**
- * @brief Parse Cyclic Voltammetry parameters.
+ * @brief Parse Voltammetry and EIS parameters.
  * 
  * @param pCommandParams OUT -- Command parameters struct.
  * @param pCommandString IN -- Command message string.
  */
-void _parseCVParams(command_t *pCommandParams, String pCommandString);
-
-/**
- * @brief Parse Differential Pulse Voltammetry parameters.
- * 
- * @param pCommandParams OUT -- Command parameters struct.
- * @param pCommandString IN -- Command message string.
- */
-void _parseDPVParams(command_t *pCommandParams, String pCommandString);
-
-/**
- * @brief Parse Square Wave Voltammetry parameters.
- * 
- * @param pCommandParams OUT -- Command parameters struct.
- * @param pCommandString IN -- Command message string.
- */
-void _parseSWVParams(command_t *pCommandParams, String pCommandString);
-
-/**
- * @brief Parse impedance spectroscopy parameters.
- * 
- * @param pCommandParams OUT -- Command parameters struct.
- * @param pCommandString IN -- Command message string.
- */
-void _parseEISParams(command_t *pCommandParams, String pCommandString);
+void _parseParams(command_t *p, String cmd, uint8_t cmdId);
 
 /**
  * @brief Parse TIA Gain command parameters.

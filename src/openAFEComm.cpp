@@ -7,7 +7,7 @@ AFE openafe;
 void openAFEComm_waitForCommands(void){
 	if(!Serial) return;
 	
-	send_ready();
+  sendStatus(ST_MSG_READY);
 
   //  [WP] Send EIS example
   // $EIS,1000,20,60000,10*
@@ -37,43 +37,43 @@ void openAFEComm_waitForCommands(void){
           float frequency, float impedance_real, float impedance_imag
         ) {
         if (cmdId == CMDID_CVW) {
-          sendPointCV(voltage, current_1);
+          sendPoint(PT_CV, voltage, current_1, 0.0f); //sendPointCV(voltage, current_1);
         } else if (cmdId == CMDID_DPV) {
-          sendPointDPV(voltage, current_1, current_2);
+          sendPoint(PT_DPV, voltage, current_1, current_2); //sendPointDPV(voltage, current_1, current_2);
         } else if (cmdId == CMDID_SWV) {
-          sendPointSW(voltage, current_1, current_2);
+          sendPoint(PT_SWV, voltage, current_1, current_2); //sendPointSW(voltage, current_1, current_2);
         } else if (cmdId == CMDID_EIS) {
-          sendPointEIS(frequency, impedance_real, impedance_imag);
+          sendPoint(PT_EIS, frequency, impedance_real, impedance_imag); //sendPointEIS(frequency, impedance_real, impedance_imag);
         }
       });
 
 			int tInterpreterResult = openAFEInterpreter_getParametersFromCommand(tCommandReceived, &commandParams);
 
 			if(tInterpreterResult < 0) 
-				sendError(tInterpreterResult);
+				sendStatus((status_id_t)tInterpreterResult);
 			if (commandParams.id == CMDID_CVW || commandParams.id == CMDID_DPV || commandParams.id == CMDID_SWV || commandParams.id == CMDID_EIS)
-				send_msg_received();
+				sendStatus(ST_MSG_RECEIVED);
 
 			int tExeResult = openAFEExecutioner_executeCommand(&openafe, &commandParams);
       
 			if (tExeResult == STATUS_VOLTAMMETRY_UNDERGOING) {
-        send_msg_startingVoltammetry();
+        sendStatus(ST_MSG_VOLTAMMETRY_START);
         tExeResult = handlePoint(&openafe, &commandParams);
       }
       else if(tExeResult == STATUS_SPECTROSCOPY_UNDERGOING){
-        send_msg_startingSpectroscoy();
+        sendStatus(ST_MSG_EIS_START);
         tExeResult = handlePointEIS(&openafe, &commandParams);
       }
       
       Serial.flush();
       delay(30);
-			if (tExeResult < 0) sendError(tExeResult);
-			else if (tExeResult == EXE_CVW_DONE)    send_msg_endOfVoltammetry();
-      else if (tExeResult == EXE_EIS_DONE)    send_msg_endOfSpectroscopy();
-      else if(tExeResult == CMDID_CUR_SETTED) send_msg_CURUpdate();
-      else if(tExeResult == CMDID_TIA_SETTED) send_msg_TIAUpdate();
-      else send_msg_received();
+			if (tExeResult < 0) sendStatus((status_id_t)tExeResult);
+			else if (tExeResult == EXE_CVW_DONE)    sendStatus(ST_MSG_END);
+      else if (tExeResult == EXE_EIS_DONE)    sendStatus(ST_MSG_END);
+      else if(tExeResult == CMDID_CUR_SETTED) sendStatus(ST_MSG_TIA_UPDT);
+      else if(tExeResult == CMDID_TIA_SETTED) sendStatus(ST_MSG_CUR_UPDT);
+      else sendStatus(ST_MSG_RECEIVED);
 		}
-		else sendError(ERROR_INVALID_COMMAND);
+		else sendStatus((status_id_t)ERROR_INVALID_COMMAND);
 	}
 }

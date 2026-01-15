@@ -6,13 +6,6 @@
 #include "../util/CRC.hpp"
 #include "../openAFEComm_Shared.hpp"
 
-/**
- * @brief Sends the proper error message accorrding to the error code passed.
- *
- * @param pErrorCode IN -- Code of the error ocurred, e.g.: -1 (ERROR_INVALID_COMMAND).
- */
-void sendError(int pErrorCode);
-
 /** 
  * @brief Sends the given message to the App, adding the suffix and CRC.
  * 
@@ -21,89 +14,112 @@ void sendError(int pErrorCode);
  * 
  * @param pMessage IN -- Raw message to be sent, e.g.: "MSG,RDY".
  */
-void sendMessage(String pMessage);
+void sendMessage(const char *msg);
 
 /**
- * @brief Send a message to the App aknowledging that the command was received.
+ * @brief Status identifiers for communication between the AFE and the host application.
  * 
+ * This enum defines both error codes and status messages that can be sent to the host.
  */
-void send_msg_received(void);
+typedef enum {
+  // Errors
+  ST_ERR_INV,
+  ST_ERR_PAR,
+  ST_ERR_GEN,
+  ST_ERR_AFE,
+  ST_ERR_WAV,
+
+  // Messages
+  ST_MSG_CUR_UPDT,
+  ST_MSG_EIS_START,
+  ST_MSG_END,
+  ST_MSG_RECEIVED,
+  ST_MSG_READY,
+  ST_MSG_TIA_UPDT,
+  ST_MSG_VOLTAMMETRY_START,
+
+  ST_COUNT
+} status_id_t;
+
+/** 
+ * @brief Error and message strings stored in program memory (PROGMEM). 
+ */
+static const char st_err_inv[] PROGMEM = "ERR,INV";
+static const char st_err_par[] PROGMEM = "ERR,PAR";
+static const char st_err_gen[] PROGMEM = "ERR,GEN";
+static const char st_err_afe[] PROGMEM = "ERR,AFE";
+static const char st_err_wav[] PROGMEM = "ERR,WAV";
+
+static const char st_msg_cur_updt[] PROGMEM = "MSG,CUR,UPDT";
+static const char st_msg_eis_s[]    PROGMEM = "MSG,EISS";
+static const char st_msg_end[]      PROGMEM = "MSG,END";
+static const char st_msg_rcd[]      PROGMEM = "MSG,RCD";
+static const char st_msg_rdy[]      PROGMEM = "MSG,RDY";
+static const char st_msg_tia_updt[] PROGMEM = "MSG,TIA,UPDT";
+static const char st_msg_cvs[]      PROGMEM = "MSG,CVS";
 
 /**
- * @brief Send message to the App that the device is ready.
+ * @brief Lookup table mapping status identifiers to their string representation.
  * 
+ * This table is stored in program memory (PROGMEM) to save RAM usage.
  */
-void send_ready(void);
+static const char* const statusTable[ST_COUNT] PROGMEM = {
+  // Errors
+  st_err_inv,
+  st_err_par,
+  st_err_gen,
+  st_err_afe,
+  st_err_wav,
+
+  // Messages
+  st_msg_cur_updt,
+  st_msg_eis_s,
+  st_msg_end,
+  st_msg_rcd,
+  st_msg_rdy,
+  st_msg_tia_updt,
+  st_msg_cvs
+};
 
 /**
- * @brief Send message to the App that the wave generation is starting.
+ * @brief Sends a status message to the App.
  * 
+ * This function retrieves the corresponding string from the status table
+ * and sends it using `sendMessage()`.
+ * 
+ * @param id IN -- Status identifier (error or message).
  */
-void send_msg_startingVoltammetry(void);
+void sendStatus(status_id_t id);
+
+// Prefixes for point messages
+static const char pr_eis[] PROGMEM = "EOT,";
+static const char pr_sgl[] PROGMEM = "SGL,";
 
 /**
- * @brief Send message to the App that the wave generation is finished.
- *
+ * @brief Point types used in measurement processes.
+ * 
+ * Defines the type of point data being sent to the host application.
  */
-void send_msg_endOfVoltammetry(void);
+typedef enum {
+  PT_EIS,
+  PT_CV,
+  PT_DPV,
+  PT_SWV
+} point_type_t;
 
 /**
- * @brief Send message to the App that the spectroscopy is starting.
- *
+ * @brief Sends a measurement point to the App.
+ * 
+ * Depending on the point type, this function formats the data accordingly:
+ * - **PT_EIS**: frequency, real impedance, imaginary impedance.
+ * - **PT_CV**: voltage, current.
+ * - **PT_DPV/PT_SWV**: voltage, current1, current2.
+ * 
+ * @param type IN -- Point type (EIS, CV, DPV, SWV).
+ * @param v1 IN -- First value (frequency or voltage).
+ * @param v2 IN -- Second value (current or real impedance).
+ * @param v3 IN -- Third value (optional: current2 or imaginary impedance).
  */
-void send_msg_startingSpectroscoy(void);
-
-/**
- * @brief Send message to the App that the spectroscopy is finished.
- *
- */
-void send_msg_endOfSpectroscopy(void);
-
-/**
- * @brief send a command to serial, indicating that the CUR has been modified successfully
- *
- */
-void send_msg_CURUpdate(void);
-
-/**
- * @brief Send a command to serial, indicating that the TIA has been modified successfully
- *
- */
-void send_msg_TIAUpdate(void);
-
-/**
- * @brief Sends a CV point via serial
- *
- * @param pVoltage_mV - Voltage in mV
- * @param pCurrent_uA - Current in uA
- */
-void sendPointCV(float pVoltage_mV, float pCurrent_uA);
-
-/**
- * @brief Sends a DPV point via serial
- *
- * @param pVoltage_mV - Voltage in mV
- * @param pCurrent_uA - Current in uA
- * @param pCurrent_uA_2 - Second Current in uA
- */
-void sendPointDPV(float pVoltage_mV, float pCurrent_uA, float pCurrent_uA_2);
-
-/**
- * @brief Sends a SW point via serial
- *
- * @param pVoltage_mV - Voltage in mV
- * @param pCurrent_uA - Current in uA
- * @param pCurrent_uA_2 - Second Current in uA
- */
-void sendPointSW(float pVoltage_mV, float pCurrent_uA, float pCurrent_uA_2);
-
-/**
- * @brief Sends an EIS point via serial
- *
- * @param frequency_Hz - Frequency in Hz
- * @param impedance_real - Real part of impedance
- * @param impedance_imag - Imaginary part of impedance
- */
-void sendPointEIS(float frequency_Hz, float impedance_real, float impedance_imag);
+void sendPoint(point_type_t type, float v1, float v2, float v3);
 
 #endif //_OPENAFE_SERIAL_

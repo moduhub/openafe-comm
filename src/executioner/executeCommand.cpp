@@ -4,7 +4,9 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 
 	switch (pCommandParams->id){
 	case CMDID_CHK:
-		return _checkAFEHealth(pOpenafeInstance);
+		return;
+    // [removed] Removed to increase available space for measurements
+    // _checkAFEHealth(pOpenafeInstance);
 		break;
 	
 	case CMDID_DIE:
@@ -12,19 +14,15 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 		break;
 
 	case CMDID_TIA:
-		return _setTIAGainResistor(pOpenafeInstance, pCommandParams);
+		return;
+    // [removed] The memory of the Arduino R3 is limiting processes; the TIA and CUR settings were removed to gain more space.
+    //  _setTIAGainResistor(pOpenafeInstance, pCommandParams);
 		break;
 
 	case CMDID_CVW:
-		return _executeCyclicVoltammetry(pOpenafeInstance, pCommandParams);
-		break;
-
 	case CMDID_DPV:
-		return _executeDifferentialPulseVoltammetry(pOpenafeInstance, pCommandParams);
-		break;
-
 	case CMDID_SWV:
-		return _executeSquareWaveVoltammetry(pOpenafeInstance, pCommandParams);
+		return _executeVoltammetry(pOpenafeInstance, pCommandParams);
 		break;
 
   case CMDID_EIS:
@@ -32,7 +30,9 @@ int openAFEExecutioner_executeCommand(AFE *pOpenafeInstance, command_t *pCommand
 		break;
 
 	case CMDID_CUR:
-		return _setCurrentRange(pOpenafeInstance, pCommandParams);
+		return;
+    // [removed] The memory of the Arduino R3 is limiting processes; the TIA and CUR settings were removed to gain more space.
+    // _setCurrentRange(pOpenafeInstance, pCommandParams);
 		break;
 
 	default:

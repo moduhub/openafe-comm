@@ -1,19 +1,20 @@
 #include "../openAFE_Serial.hpp"
 
-void sendMessage(String pMessage){
-	if(!Serial) return;
+void sendMessage(const char *msg){
+  if (!Serial) return;
 
-	char tChecksumArr[3];
+  uint8_t crc = calculateCRC(msg);
 
-	sprintf(tChecksumArr, "%02x", calculateCRC(pMessage));
+  Serial.write('$');
+  Serial.print(msg);
+  Serial.write('*');
 
-	String tChecksumString = String(tChecksumArr);
-	tChecksumString.toUpperCase();
+  const char hex[] = "0123456789ABCDEF";
+  Serial.write(hex[(crc >> 4) & 0x0F]);
+  Serial.write(hex[crc & 0x0F]);
 
-	String tMessageToSend = '$' + pMessage + '*' + tChecksumString + '\n';
-
-	Serial.print(tMessageToSend);
+  Serial.write('\n');
   Serial.flush();
 
-	return;
+  return;
 }
